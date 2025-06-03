@@ -1,9 +1,9 @@
-purpose 👩‍💼
+<b>purpose</b> 👩‍💼
 
 Replacing costly and bloated wordpress solutions to get GTM working properly with Google Consent Mode v2
 
 
-installation 👩‍🔧
+<b>installation</b> 👩‍🔧
 1. download all files
 2. login via ftp to your wordpress
 3. navigate to wp-content/plugins
