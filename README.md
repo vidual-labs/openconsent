@@ -1,9 +1,9 @@
-<h1>Purpose👩‍💼</h1> <br><br>
+<h1>Purpose👩‍💼</h1> <br>
 
 Replacing costly and bloated wordpress solutions to get GTM working properly with Google Consent Mode v2
 
 
-<h1>Installation 👩‍🔧</h1> <br><br>
+<h1>Installation 👩‍🔧</h1> <br>
 1. download all files as zip<br>
 2. in your wordpress backend, switch to plugins and upload zip<br>
 6. activate the openconsent plugin<br>
