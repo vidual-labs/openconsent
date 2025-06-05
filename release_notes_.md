@@ -1,6 +1,14 @@
 # OpenConsent Plugin - Release Notes
 
-## Version 1.0.2 (Current) - 2025-06-05
+
+## Version 1.0.3 (Current) - 2025-06-05
+
+
+* **Fixed:** critical bugfix in openconsent.php
+
+
+
+## Version 1.0.2 - 2025-06-05
 
 * **Added:** "Minimized State" feature:
     * After user interaction (Accept/Decline), a small, clickable widget appears (default: bottom-right).
