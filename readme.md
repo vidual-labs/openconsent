@@ -79,7 +79,7 @@ See [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
 ## Support
 
-If you encounter any issues or have feature requests, please use the [GitHub Issues tracker](https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME/issues) (Replace with your actual link).
+If you encounter any issues or have feature requests, please use the [GitHub Issues tracker](https://github.com/vidual-labs/openconsent/issues) (Replace with your actual link).
 
 ## Contributing
 
