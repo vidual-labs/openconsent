@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: OpenConsent
- * Plugin URI: https://vidual.com/openconsent
+ * Plugin URI: https://github.com/vidual-labs/openconsent/
  * Description: A cookie banner plugin with Google Tag Manager integration and Google Consent Mode v2 support.
  * Version: 1.0.3
  * Author: vidual
