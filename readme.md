@@ -28,7 +28,7 @@ OpenConsent is a WordPress plugin designed to help website owners comply with co
 
 ### Manual Installation
 
-1.  Download the latest release (`openconsent.zip`) from the [GitHub Releases page](https://github.com/vidual-labs/openconsent) (Replace with your actual link).
+1.  Download the latest release (`openconsent.zip`) from the [GitHub Releases page](https://github.com/vidual-labs/openconsent) 
 2.  In your WordPress admin panel, go to **Plugins > Add New**.
 3.  Click **Upload Plugin** at the top.
 4.  Upload the `openconsent.zip` file.
@@ -79,7 +79,7 @@ See [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
 ## Support
 
-If you encounter any issues or have feature requests, please use the [GitHub Issues tracker](https://github.com/vidual-labs/openconsent/issues) (Replace with your actual link).
+If you encounter any issues or have feature requests, please use the [GitHub Issues tracker](https://github.com/vidual-labs/openconsent/issues) 
 
 ## Contributing
 
