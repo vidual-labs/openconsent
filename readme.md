@@ -93,6 +93,6 @@ See the [LICENSE](https://www.gnu.org/licenses/gpl-2.0.html) file for more detai
 ## Author
 
 Developed by [vidual](https://vidual.org).
-Plugin page: [OpenConsent](https://vidual.org) 
+Plugin page: [OpenConsent](https://github.com/vidual-labs/openconsent)
 
 This plugin has been vibecoded with Gemini 2.5 pro
