@@ -15,9 +15,10 @@ OpenConsent is a WordPress plugin designed to help website owners comply with co
     * **Appearance:** Adjust banner background color, text color, link color, and button background/text colors.
     * **Positioning:** Choose from 11 positions for the main banner (e.g., bottom full, top right, middle center).
 * **Google Tag Manager Integration:** Easily add your GTM ID to inject the GTM script correctly based on consent.
-* **Minimized Re-Open Widget:** After initial interaction, a small, clickable widget appears, allowing users to revisit and change their consent settings.
+* **Minimized Re-Open Widget:** After initial interaction, a small, clickable widget appears, allowing users to revisit and change their consent settings. (you can deavtivat that)
 * **Enable/Disable:** Option to easily activate or deactivate the entire banner functionality.
 * **Responsive Design:** The banner and widget are designed to adapt to different screen sizes.
+* * **NEW with v1.0.7:** Plugin is able to detect Google Site Kit and then change into compatiblity mode. It fully supports WP Consent API now.
 
 ## Requirements
 
