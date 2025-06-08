@@ -1,21 +1,27 @@
-/* OpenConsent Frontend CSS */
+/*
+ * OpenConsent Frontend CSS
+ * Version: 1.0.4
+ */
 
 /* --- General Banner Styling --- */
 #oc-cookie-banner {
-    /* display: none; is set inline by PHP, will be overridden by JS */
+    /* The banner is initially hidden by an inline style `display: none;` from PHP.
+       JavaScript is responsible for showing it by changing this to `display: block;` or similar. */
     position: fixed;
-    z-index: 100000; /* Increased z-index */
+    z-index: 100000;
     box-sizing: border-box;
-    padding: 20px; /* Increased padding, can be adjusted per view if needed */
+    padding: 20px;
     box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
     font-size: 14px;
     line-height: 1.5;
+    /* Background and text colors are set via inline styles from PHP */
 }
 
 #oc-cookie-banner p {
     margin: 0 0 10px 0;
     padding: 0;
 }
+
 #oc-cookie-banner p:last-child {
     margin-bottom: 0;
 }
@@ -27,7 +33,7 @@
 #oc-cookie-banner .oc-banner-actions {
     display: flex;
     align-items: center;
-    flex-wrap: wrap; /* Allow buttons to wrap if not enough space */
+    flex-wrap: wrap; /* Allows buttons to wrap on smaller screens if needed */
 }
 
 #oc-cookie-banner button {
@@ -36,97 +42,112 @@
     border: none;
     border-radius: 3px;
     font-size: 14px;
-    box-sizing: border-box; /* Ensure padding/border included in width/height */
-    margin-bottom: 5px; /* Add some space if buttons wrap */
+    box-sizing: border-box;
+    margin-bottom: 5px; /* Provides space if buttons wrap to a new line */
+    /* Button colors are set via inline styles from PHP */
 }
-/* Desktop: margin-left for decline btn is set inline by PHP */
-
 
 /* --- Minimized Cookie Widget --- */
 #oc-cookie-widget {
     position: fixed;
-    bottom: 10px;
-    right: 10px;
-    z-index: 99999; /* Slightly lower than main banner if they could overlap */
-    background-color: #333; /* Example background */
-    color: #fff; /* Example text color */
+    /* Aligned with floating banners for consistency */
+    bottom: 20px;
+    right: 20px;
+    z-index: 99999;
+    /* Background and text colors are set via inline styles from PHP */
     padding: 8px 12px;
     border-radius: 3px;
     cursor: pointer;
     font-size: 13px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    /* display: none; initially by inline style, JS will control visibility */
 }
+
 #oc-cookie-widget:hover {
-    background-color: #444; /* Example hover */
+    /* A generic hover effect that works with any color */
+    filter: brightness(110%);
 }
 
 
-/* --- Banner Positioning --- */
-/* ... (Positioning styles from previous version remain the same) ... */
-/* Default: Full Width Bottom (can also be used for top-full) */
+/* --- Banner Positioning Classes --- */
+
+/* Full Width (Top & Bottom) */
 .oc-banner-position-bottom-full,
 .oc-banner-position-top-full {
     left: 0;
     right: 0;
     width: 100%;
 }
-.oc-banner-position-bottom-full { bottom: 0; }
-.oc-banner-position-top-full { top: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.oc-banner-position-bottom-full {
+    bottom: 0;
+    border-top: 1px solid rgba(0,0,0,0.1);
+}
+.oc-banner-position-top-full {
+    top: 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
 
-/* Bottom Floating */
-.oc-banner-position-bottom-left { bottom: 20px; left: 20px; max-width: 380px; } /* Slightly wider */
-.oc-banner-position-bottom-right { bottom: 20px; right: 20px; max-width: 380px; }
-.oc-banner-position-bottom-center { bottom: 20px; left: 50%; transform: translateX(-50%); max-width: 550px; }
+/* Floating Bottom */
+.oc-banner-position-bottom-left { bottom: 20px; left: 20px; max-width: 380px; border-radius: 3px; }
+.oc-banner-position-bottom-right { bottom: 20px; right: 20px; max-width: 380px; border-radius: 3px; }
+.oc-banner-position-bottom-center { bottom: 20px; left: 50%; transform: translateX(-50%); max-width: 550px; border-radius: 3px; }
 
-/* Top Floating */
-.oc-banner-position-top-left { top: 20px; left: 20px; max-width: 380px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-.oc-banner-position-top-right { top: 20px; right: 20px; max-width: 380px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-.oc-banner-position-top-center { top: 20px; left: 50%; transform: translateX(-50%); max-width: 550px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+/* Floating Top */
+.oc-banner-position-top-left { top: 20px; left: 20px; max-width: 380px; border-radius: 3px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.oc-banner-position-top-right { top: 20px; right: 20px; max-width: 380px; border-radius: 3px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.oc-banner-position-top-center { top: 20px; left: 50%; transform: translateX(-50%); max-width: 550px; border-radius: 3px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
 
-/* Middle (Modal/Floating) */
+/* Floating Middle & Modal */
 .oc-banner-position-middle-center { top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 550px; width: 90%; box-shadow: 0 0 20px rgba(0,0,0,0.2); border-radius: 5px; }
 .oc-banner-position-middle-left { top: 50%; left: 20px; transform: translateY(-50%); max-width: 380px; box-shadow: 0 0 15px rgba(0,0,0,0.15); border-radius: 3px; }
 .oc-banner-position-middle-right { top: 50%; right: 20px; transform: translateY(-50%); max-width: 380px; box-shadow: 0 0 15px rgba(0,0,0,0.15); border-radius: 3px; }
 
 
-/* --- Responsive adjustments --- */
+/* --- Responsive Adjustments --- */
 @media (max-width: 768px) {
     #oc-cookie-banner {
-        padding: 15px; /* Slightly less padding on mobile if desired, or keep 20px */
+        padding: 15px;
     }
 
+    /* Make floating banners full-width on mobile for better usability */
     .oc-banner-position-bottom-left, .oc-banner-position-bottom-right, .oc-banner-position-bottom-center,
     .oc-banner-position-top-left, .oc-banner-position-top-right, .oc-banner-position-top-center,
     .oc-banner-position-middle-left, .oc-banner-position-middle-right {
-        left: 10px; right: 10px; bottom: 10px; /* if bottom */
-        max-width: none; width: auto;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        max-width: none;
+        width: auto;
         transform: none;
     }
-    /* Adjust top for top-positioned floating banners on mobile */
+    
     .oc-banner-position-top-left, .oc-banner-position-top-right, .oc-banner-position-top-center {
         top: 10px;
-        bottom: auto; /* Ensure bottom is not affecting top banners */
+        bottom: auto; /* Ensure 'bottom' from the rule above doesn't affect top banners */
     }
-    .oc-banner-position-middle-center { max-width: 90%; }
+
+    .oc-banner-position-middle-center {
+        max-width: 90%;
+    }
 
     #oc-cookie-banner .oc-banner-actions {
         flex-direction: column;
-        align-items: stretch;
-    }
-    #oc-cookie-banner button {
-        width: 100%; /* Full width buttons on mobile */
-        margin-right: 0 !important; /* Override any right margins */
-        margin-left: 0 !important; /* Override any left margins, including inline */
-    }
-    #oc-cookie-banner button#oc-decline-btn {
-        margin-top: 10px; /* Space between stacked buttons */
+        align-items: stretch; /* Make buttons take up full width of the container */
     }
 
-    /* Minimized widget adjustments for mobile if needed */
+    #oc-cookie-banner button {
+        width: 100%;
+        margin-right: 0 !important;
+        margin-left: 0 !important; /* This overrides the inline style on the decline button for mobile */
+    }
+
+    #oc-cookie-banner button#oc-decline-btn {
+        margin-top: 10px; /* Add space between stacked buttons */
+    }
+
     #oc-cookie-widget {
-        /* Example: make it slightly less wide or adjust position */
-        /* max-width: 150px; */
+        bottom: 10px;
+        right: 10px;
         font-size: 12px;
         padding: 6px 10px;
     }

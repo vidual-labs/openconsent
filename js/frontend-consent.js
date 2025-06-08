@@ -1,4 +1,5 @@
 jQuery(document).ready(function($) {
+
     // --- Cookie Helper Functions ---
     function setCookie(name, value, days) {
         var expires = "";
@@ -21,14 +22,14 @@ jQuery(document).ready(function($) {
         return null;
     }
 
-    // --- GTM Loader Function ---
+    // --- GTM Loader Function (for Standalone Mode only) ---
     function loadGtmScript(gtmId) {
-        if (!gtmId || window.gtmScriptLoaded) { // Check if GTM ID exists and script not already loaded
-            if (!gtmId) console.log('OpenConsent: GTM ID not provided.');
+        if (!settings.should_load_own_gtm || !gtmId || window.gtmScriptLoaded) {
+            if (settings.should_load_own_gtm && !gtmId) console.log('OpenConsent Standalone: GTM ID not provided.');
             return;
         }
-        console.log('OpenConsent: Loading GTM with ID:', gtmId);
-        window.gtmScriptLoaded = true; // Flag to prevent multiple loads
+        console.log('OpenConsent Standalone: Loading GTM with ID:', gtmId);
+        window.gtmScriptLoaded = true;
 
         (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
         new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -49,27 +50,22 @@ jQuery(document).ready(function($) {
     var banner = $('#oc-cookie-banner');
     var acceptBtn = $('#oc-accept-btn');
     var declineBtn = $('#oc-decline-btn');
-    var cookieWidget = $('#oc-cookie-widget'); // New widget element
+    var cookieWidget = $('#oc-cookie-widget');
 
     var settings = window.oc_js_vars || {};
     var cookieName = settings.cookie_name || 'openconsent_status';
     var cookieDuration = parseInt(settings.cookie_duration_days, 10) || 365;
     var gtmId = settings.gtm_id || null;
     var minimizedText = settings.minimized_text || 'Cookie Settings';
+    var enableWidget = settings.enable_minimized_widget;
+    var ajaxUrl = settings.ajax_url;
+    var ajaxNonce = settings.ajax_nonce;
 
-    // Populate initial texts
-    if (settings.banner_text && banner.length) {
-        banner.find('.oc-banner-content').html(settings.banner_text);
-    }
-    if (settings.accept_text && acceptBtn.length) {
-        acceptBtn.text(settings.accept_text);
-    }
-    if (settings.decline_text && declineBtn.length) {
-        declineBtn.text(settings.decline_text);
-    }
-    if (cookieWidget.length) {
-        cookieWidget.text(minimizedText);
-    }
+    // Populate texts from settings
+    if (banner.length) banner.find('.oc-banner-content').html(settings.banner_text);
+    if (acceptBtn.length) acceptBtn.text(settings.accept_text);
+    if (declineBtn.length) declineBtn.text(settings.decline_text);
+    if (cookieWidget.length) cookieWidget.text(minimizedText);
 
     function showBanner() {
         if (banner.length) banner.show();
@@ -77,83 +73,87 @@ jQuery(document).ready(function($) {
     }
 
     function showWidget() {
+        if (!enableWidget) return;
         if (banner.length) banner.hide();
         if (cookieWidget.length) cookieWidget.show();
     }
 
-    function hideAll() {
-        if (banner.length) banner.hide();
-        if (cookieWidget.length) cookieWidget.hide();
+    function updateWPConsentAPI(status) {
+        if (!ajaxUrl) { return $.Deferred().resolve().promise(); }
+        return $.ajax({
+            url: ajaxUrl,
+            type: 'POST',
+            data: { action: 'openconsent_update_consent', nonce: ajaxNonce, status: status }
+        }).done(function(response) {
+            console.log('OpenConsent: WP Consent API AJAX call successful.', response);
+        }).fail(function(xhr) {
+            console.error('OpenConsent: WP Consent API AJAX request failed.', xhr.statusText);
+        });
     }
 
+    // --- Initial Page Load Check ---
     var consentCookie = getCookie(cookieName);
-
     if (consentCookie === 'granted') {
-        console.log('OpenConsent: Consent previously granted.');
+        // **KEY CHANGE**: Always send the 'update' command on page load if consent was granted.
+        // This overrides Site Kit's safe 'denied' default for the current page view.
         if (typeof gtag === 'function') {
-            gtag('consent', 'update', {
-                'ad_storage': 'granted', 'ad_user_data': 'granted',
-                'ad_personalization': 'granted', 'analytics_storage': 'granted'
-            });
+            console.log("OpenConsent: Consent is 'granted'. Updating GCM state to granted.");
+            gtag('consent', 'update', {'ad_storage': 'granted', 'ad_user_data': 'granted', 'ad_personalization': 'granted', 'analytics_storage': 'granted'});
         }
-        loadGtmScript(gtmId);
-        showWidget(); // Show widget instead of hiding everything
+
+        // In standalone mode, we must also load our own GTM script
+        if (settings.should_load_own_gtm) {
+            loadGtmScript(gtmId);
+        }
+        showWidget();
     } else if (consentCookie === 'denied') {
-        console.log('OpenConsent: Consent previously denied.');
-        if (typeof gtag === 'function') {
-            gtag('consent', 'update', {
-                'ad_storage': 'denied', 'ad_user_data': 'denied',
-                'ad_personalization': 'denied', 'analytics_storage': 'denied'
-            });
-        }
-        showWidget(); // Show widget instead of hiding everything
+        showWidget();
     } else {
-        console.log('OpenConsent: No consent status found. Displaying banner.');
         showBanner();
     }
 
+    // --- Button Click Handlers ---
     acceptBtn.on('click', function() {
-        console.log('OpenConsent: Accept clicked.');
-        var anUpdateOccurred = getCookie(cookieName) !== 'granted'; // Check if state is actually changing to granted
+        var newStatus = 'granted';
+        var anUpdateOccurred = getCookie(cookieName) !== newStatus;
 
+        // The gtag update on click is still useful for single-page applications,
+        // but the reload is what makes it work for Site Kit.
         if (typeof gtag === 'function') {
-            gtag('consent', 'update', {
-                'ad_storage': 'granted', 'ad_user_data': 'granted',
-                'ad_personalization': 'granted', 'analytics_storage': 'granted'
-            });
-            console.log('OpenConsent: GCM V2 updated to granted.');
+            gtag('consent', 'update', {'ad_storage': 'granted', 'ad_user_data': 'granted', 'ad_personalization': 'granted', 'analytics_storage': 'granted'});
         }
-        setCookie(cookieName, 'granted', cookieDuration);
-        showWidget();
-
-        // Reload only if GTM hasn't been loaded yet (e.g. first time accepting)
-        // or if the consent state genuinely changed to 'granted' from something else
-        if (!window.gtmScriptLoaded || anUpdateOccurred) {
-            console.log('OpenConsent: Reloading page to apply consent and load GTM.');
-            window.location.reload();
-        } else {
-            // If GTM is already loaded and consent was already 'granted', no need to reload.
-            // Just ensure widget is shown.
-            loadGtmScript(gtmId); // Call again to ensure it runs if it hasn't due to some edge case
-        }
+        
+        setCookie(cookieName, newStatus, cookieDuration);
+        
+        updateWPConsentAPI(newStatus).always(function() {
+            if (anUpdateOccurred) {
+                window.location.reload();
+            } else {
+                showWidget();
+            }
+        });
     });
 
     declineBtn.on('click', function() {
-        console.log('OpenConsent: Decline clicked.');
+        var newStatus = 'denied';
+        var anUpdateOccurred = getCookie(cookieName) !== newStatus;
+        
         if (typeof gtag === 'function') {
-            gtag('consent', 'update', {
-                'ad_storage': 'denied', 'ad_user_data': 'denied',
-                'ad_personalization': 'denied', 'analytics_storage': 'denied'
-            });
-            console.log('OpenConsent: GCM V2 updated to denied.');
+            gtag('consent', 'update', {'ad_storage': 'denied', 'ad_user_data': 'denied', 'ad_personalization': 'denied', 'analytics_storage': 'denied'});
         }
-        setCookie(cookieName, 'denied', cookieDuration);
-        showWidget();
-        // No reload needed for decline
+
+        setCookie(cookieName, newStatus, cookieDuration);
+
+        updateWPConsentAPI(newStatus).always(function() {
+            if (anUpdateOccurred) {
+                 window.location.reload();
+            } else {
+                showWidget();
+            }
+        });
     });
 
     cookieWidget.on('click', function() {
-        console.log('OpenConsent: Cookie widget clicked.');
         showBanner();
     });
 });
