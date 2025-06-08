@@ -18,7 +18,7 @@ OpenConsent is a WordPress plugin designed to help website owners comply with co
 * **Minimized Re-Open Widget:** After initial interaction, a small, clickable widget appears, allowing users to revisit and change their consent settings. (you can deavtivat that)
 * **Enable/Disable:** Option to easily activate or deactivate the entire banner functionality.
 * **Responsive Design:** The banner and widget are designed to adapt to different screen sizes.
-* * **NEW with v1.0.7:** Plugin is able to detect Google Site Kit and then change into compatiblity mode. It fully supports WP Consent API now.
+* **NEW with v1.0.7:** Plugin is able to detect Google Site Kit and then change into compatiblity mode. It fully supports WP Consent API now.
 
 ## Requirements
 
