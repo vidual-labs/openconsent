@@ -1,6 +1,10 @@
 # OpenConsent Plugin - Release Notes
 
-## Version 1.0.7 (Current) - 2025-06-08
+## Version 1.0.8 (Current) - 2025-06-19
+
+* **Fixed:** Corrected the positioning of the minimized "Cookie Settings" widget on mobile devices. The widget now has appropriate margins and a max-width to ensure it no longer overflows or gets cut off on smaller viewports.
+
+## Version 1.0.7 - 2025-06-08
 
 * **Fixed:** Corrected a critical issue in the Google Site Kit integration where tags would not fire after consent was accepted. The plugin's JavaScript now correctly sends a client-side `gtag('consent', 'update', ...)` command on subsequent page loads, ensuring that tags managed by Site Kit are activated as expected.
 * **Improved:** Refined the JavaScript logic for both "Accept" and "Decline" paths to ensure page reloads only happen when the consent status genuinely changes, preventing unnecessary reloads.
