@@ -11,13 +11,42 @@ if ( ! defined( 'ABSPATH' ) ) {
 class OpenConsent_Admin_Einstellungen {
 
     /**
+     * Get default settings
+     * @return array Default settings
+     */
+    public static function get_default_settings() {
+        return array(
+            'enable_banner' => 1,
+            'enable_minimized_widget' => 1,
+            'gtm_id' => '',
+            'banner_text' => sprintf('<p>%s <a href="YOUR_PRIVACY_POLICY_URL_HERE" target="_blank">%s</a>.</p>', __('This website uses cookies to enhance your experience.', 'openconsent'), __('Read our Privacy Policy', 'openconsent')),
+            'accept_text' => __('Accept', 'openconsent'),
+            'decline_text' => __('Decline', 'openconsent'),
+            'minimized_text' => __('Cookie Settings', 'openconsent'),
+            'banner_position' => 'bottom-full',
+            'banner_bg_color' => '#222222',
+            'banner_text_color' => '#ffffff',
+            'link_color' => '#00a0d2',
+            'accept_button_bg_color' => '#0073aa',
+            'accept_button_text_color' => '#ffffff',
+            'decline_button_bg_color' => '#757575',
+            'decline_button_text_color' => '#ffffff',
+            'widget_bg_color' => '#333333',
+            'widget_text_color' => '#ffffff',
+        );
+    }
+
+    /**
      * Register all settings, sections, and fields.
      */
     public static function register_settings() {
         register_setting(
             'openconsent_settings_group', // Option group
             OC_OPTION_NAME,               // Option name
-            array( __CLASS__, 'sanitize_settings' ) // Sanitize callback
+            array(
+                'sanitize_callback' => array( __CLASS__, 'sanitize_settings' ),
+                'show_in_rest' => false
+            )
         );
 
         // --- SECTIONS ---
@@ -108,16 +137,49 @@ class OpenConsent_Admin_Einstellungen {
 
     public static function settings_page_html() {
         if ( ! current_user_can( 'manage_options' ) ) return;
+
+        // Handle import/export
+        if ( isset( $_POST['oc_export_settings'] ) && check_admin_referer( 'oc_export_nonce' ) ) {
+            self::handle_export_settings();
+        }
+        if ( isset( $_POST['oc_import_settings'] ) && check_admin_referer( 'oc_import_nonce' ) ) {
+            self::handle_import_settings();
+        }
+        if ( isset( $_POST['oc_reset_settings'] ) && check_admin_referer( 'oc_reset_nonce' ) ) {
+            self::handle_reset_settings();
+        }
         ?>
         <div class="wrap">
             <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+            <p style="color: #666;"><?php esc_html_e( 'Configure your cookie consent banner settings below. All colors support hex values.', 'openconsent' ); ?></p>
             <?php settings_errors(); ?>
+
             <form action="options.php" method="post">
                 <?php
                 settings_fields( 'openconsent_settings_group' );
                 do_settings_sections( OC_SETTINGS_SLUG );
                 submit_button( __( 'Save Settings', 'openconsent' ) );
                 ?>
+            </form>
+
+            <hr style="margin: 40px 0;">
+            <h2><?php esc_html_e( 'Import/Export Settings', 'openconsent' ); ?></h2>
+            <p><?php esc_html_e( 'Backup your settings or transfer them to another site.', 'openconsent' ); ?></p>
+
+            <form method="post" style="margin-bottom: 20px;">
+                <?php wp_nonce_field( 'oc_export_nonce' ); ?>
+                <?php submit_button( __( 'Export Settings', 'openconsent' ), 'secondary', 'oc_export_settings' ); ?>
+            </form>
+
+            <form method="post" enctype="multipart/form-data" style="margin-bottom: 20px;">
+                <?php wp_nonce_field( 'oc_import_nonce' ); ?>
+                <input type="file" name="oc_import_file" accept=".json" required>
+                <?php submit_button( __( 'Import Settings', 'openconsent' ), 'secondary', 'oc_import_settings' ); ?>
+            </form>
+
+            <form method="post" style="margin-bottom: 20px;">
+                <?php wp_nonce_field( 'oc_reset_nonce' ); ?>
+                <?php submit_button( __( 'Reset to Defaults', 'openconsent' ), 'delete', 'oc_reset_settings', array( 'onclick' => 'return confirm("' . esc_attr( __( 'Are you sure? This will reset all settings to defaults.', 'openconsent' ) ) . '");' ) ); ?>
             </form>
         </div>
         <script type="text/javascript">
@@ -126,6 +188,50 @@ class OpenConsent_Admin_Einstellungen {
             });
         </script>
         <?php
+    }
+
+    /**
+     * Handle settings export
+     */
+    public static function handle_export_settings() {
+        $settings = get_option( OC_OPTION_NAME );
+        $filename = 'openconsent-settings-' . gmdate( 'Y-m-d-H-i-s' ) . '.json';
+
+        header( 'Content-Type: application/json' );
+        header( 'Content-Disposition: attachment; filename=' . $filename );
+        echo wp_json_encode( $settings, JSON_PRETTY_PRINT );
+        exit;
+    }
+
+    /**
+     * Handle settings import
+     */
+    public static function handle_import_settings() {
+        if ( ! isset( $_FILES['oc_import_file'] ) || $_FILES['oc_import_file']['error'] !== UPLOAD_ERR_OK ) {
+            add_settings_error( 'oc_import', 'oc_import_error', __( 'Failed to upload file.', 'openconsent' ), 'error' );
+            return;
+        }
+
+        $file_content = file_get_contents( $_FILES['oc_import_file']['tmp_name'] );
+        $imported_settings = json_decode( $file_content, true );
+
+        if ( ! is_array( $imported_settings ) ) {
+            add_settings_error( 'oc_import', 'oc_import_error', __( 'Invalid settings file format.', 'openconsent' ), 'error' );
+            return;
+        }
+
+        // Sanitize imported settings
+        $sanitized = self::sanitize_settings( $imported_settings );
+        update_option( OC_OPTION_NAME, $sanitized );
+        add_settings_error( 'oc_import', 'oc_import_success', __( 'Settings imported successfully.', 'openconsent' ), 'updated' );
+    }
+
+    /**
+     * Handle settings reset
+     */
+    public static function handle_reset_settings() {
+        update_option( OC_OPTION_NAME, self::get_default_settings() );
+        add_settings_error( 'oc_reset', 'oc_reset_success', __( 'Settings have been reset to defaults.', 'openconsent' ), 'updated' );
     }
 
     public static function render_enable_banner_field() {
@@ -140,21 +246,57 @@ class OpenConsent_Admin_Einstellungen {
         $value = $options['gtm_id'] ?? '';
         $site_kit_active = is_plugin_active('google-site-kit/google-site-kit.php');
 
-        echo '<input type="text" id="oc_gtm_id" name="' . OC_OPTION_NAME . '[gtm_id]" value="' . esc_attr( $value ) . '" class="regular-text" placeholder="GTM-XXXXXXX">';
-        
+        echo '<input type="text" id="oc_gtm_id" name="' . OC_OPTION_NAME . '[gtm_id]" value="' . esc_attr( $value ) . '" class="regular-text" placeholder="GTM-XXXXXXX" pattern="GTM-[A-Z0-9]+">';
+
         if ($site_kit_active) {
-            echo '<p class="description" style="color: green;">' . __( '<strong>Google Site Kit is active.</strong> OpenConsent will not load GTM itself. It will only pass consent information to Site Kit. Please ensure your GTM ID is configured within Site Kit.', 'openconsent' ) . '</p>';
+            echo '<p class="description" style="color: #0a7600; background: #f0f6f0; padding: 8px; border-radius: 3px; margin-top: 8px;">' .
+                sprintf(
+                    '<strong>✓ %s</strong> %s',
+                    __('Google Site Kit is active', 'openconsent'),
+                    __('OpenConsent will pass consent information to Site Kit. Ensure your GTM ID is configured within Site Kit for best results.', 'openconsent')
+                ) .
+                '</p>';
         } else {
-            echo '<p class="description">' . __( '<strong>Standalone Mode:</strong> Google Site Kit is not active. OpenConsent will load GTM using this ID if provided.', 'openconsent' ) . '</p>';
+            echo '<p class="description" style="background: #f9f9f9; padding: 8px; border-radius: 3px; margin-top: 8px; border-left: 4px solid #0073aa;">' .
+                sprintf(
+                    '<strong>%s:</strong> %s',
+                    __('Standalone Mode', 'openconsent'),
+                    __('Google Site Kit is not active. OpenConsent will load GTM directly if you provide a valid GTM ID. This enables consent mode integration.', 'openconsent')
+                ) .
+                '</p>';
         }
     }
 
     public static function render_banner_text_field() {
         $options = get_option( OC_OPTION_NAME );
-        $default_text = sprintf('<p>%s <a href="YOUR_PRIVACY_POLICY_URL_HERE" target="_blank">%s</a>.</p>', __('This website uses cookies to enhance your experience.', 'openconsent'), __('Read our Privacy Policy', 'openconsent'));
-        $content = $options['banner_text'] ?? $default_text;
-        wp_editor( $content, 'oc_banner_text_editor', array( 'textarea_name' => OC_OPTION_NAME . '[banner_text]', 'media_buttons' => false, 'textarea_rows' => 7, 'quicktags' => true, 'tinymce' => array( 'toolbar1' => 'bold,italic,underline,link,unlink')) );
-        echo '<p class="description">' . __( 'Enter the message for the main cookie banner. Use the editor to add formatting and links.', 'openconsent' ) . '</p>';
+        $defaults = self::get_default_settings();
+        $content = $options['banner_text'] ?? $defaults['banner_text'];
+
+        wp_editor(
+            $content,
+            'oc_banner_text_editor',
+            array(
+                'textarea_name' => OC_OPTION_NAME . '[banner_text]',
+                'media_buttons' => false,
+                'textarea_rows' => 7,
+                'quicktags' => true,
+                'tinymce' => array(
+                    'toolbar1' => 'bold,italic,underline,link,unlink'
+                )
+            )
+        );
+
+        echo '<p class="description">' .
+            sprintf(
+                '%s %s',
+                __( 'Enter the message for the main cookie banner. Use the editor to add formatting and links.', 'openconsent' ),
+                sprintf(
+                    '<strong>%s:</strong> %s',
+                    __( 'Tip', 'openconsent' ),
+                    __( 'Always include a link to your Privacy Policy as required by GDPR/CCPA regulations.', 'openconsent' )
+                )
+            ) .
+            '</p>';
     }
 
     public static function render_accept_text_field() {
@@ -207,7 +349,13 @@ class OpenConsent_Admin_Einstellungen {
     public static function render_accept_button_text_color_field() { self::render_color_picker_field( 'accept_button_text_color', '#ffffff' ); }
     public static function render_decline_button_bg_color_field() {
         self::render_color_picker_field( 'decline_button_bg_color', '#757575' );
-        echo '<p class="description" style="color:#c00;">' . __( '<strong>Note:</strong> To comply with regulations like GDPR, the "Decline" option must be as easy to choose as "Accept". Visually de-emphasizing this button may not be compliant.', 'openconsent' ) . '</p>';
+        echo '<p class="description" style="background: #fef5f5; border-left: 4px solid #c00; padding: 10px; border-radius: 3px; color: #333;">' .
+            sprintf(
+                '<strong>⚠️ %s:</strong> %s',
+                __( 'GDPR/CCPA Compliance Required', 'openconsent' ),
+                __( 'The "Decline" button must be as prominent and easy to click as the "Accept" button. Visual de-emphasis may make your banner non-compliant with regulations. Consider using similar colors and prominence for both buttons.', 'openconsent' )
+            ) .
+            '</p>';
     }
     public static function render_decline_button_text_color_field() { self::render_color_picker_field( 'decline_button_text_color', '#ffffff' ); }
     public static function render_widget_bg_color_field() { self::render_color_picker_field( 'widget_bg_color', '#333333' ); }
