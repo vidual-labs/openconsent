@@ -3,7 +3,7 @@
  * Plugin Name: OpenConsent
  * Plugin URI: https://vidual.org/openconsent
  * Description: A cookie banner that provides consent signals to the native WP Consent API or manages GTM standalone.
- * Version: 1.0.7
+ * Version: 1.1.0
  * Author: vidual
  * Author URI: https://vidual.org
  * License: GPL v2 or later
@@ -16,9 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 define( 'OC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'OC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'OC_VERSION', '1.0.6' );
+define( 'OC_VERSION', '1.1.0' );
 define( 'OC_SETTINGS_SLUG', 'openconsent_settings' );
 define( 'OC_OPTION_NAME', 'openconsent_settings' );
+define( 'OC_CONSENT_API_CATEGORIES', array( 'analytics', 'marketing', 'preferences', 'functional' ) );
 
 require_once OC_PLUGIN_DIR . 'admin/admin-einstellungen.php';
 
@@ -94,22 +95,55 @@ class OpenConsent_Plugin {
     }
 
     public function ajax_update_wp_consent() {
-        check_ajax_referer( 'openconsent_consent_nonce', 'nonce' );
+        try {
+            check_ajax_referer( 'openconsent_consent_nonce', 'nonce' );
+        } catch ( Exception $e ) {
+            wp_send_json_error( array( 'message' => 'Security verification failed.' ), 403 );
+            return;
+        }
+
         if ( ! function_exists( 'wp_set_consent' ) ) {
             wp_send_json_error( array( 'message' => 'WP Consent API not available.' ) );
             return;
         }
+
+        // Validate and sanitize status
         $status_from_js = isset( $_POST['status'] ) ? sanitize_key( $_POST['status'] ) : 'denied';
+        if ( ! in_array( $status_from_js, array( 'granted', 'denied' ), true ) ) {
+            wp_send_json_error( array( 'message' => 'Invalid consent status provided.' ) );
+            return;
+        }
+
         $wp_api_status = ( $status_from_js === 'granted' ) ? 'allow' : 'deny';
-        $categories = array( 'analytics', 'marketing', 'preferences', 'functional' );
-        foreach ( $categories as $category ) {
+
+        // Use the defined categories constant
+        foreach ( OC_CONSENT_API_CATEGORIES as $category ) {
             wp_set_consent( $category, $wp_api_status );
         }
-        wp_send_json_success( array( 'message' => 'WP Consent API updated to: ' . $wp_api_status ) );
+
+        wp_send_json_success( array(
+            'message' => 'WP Consent API updated to: ' . $wp_api_status,
+            'status' => $status_from_js
+        ) );
     }
 
     public function insert_gtm_consent_default() {
-        echo "\n<script>\nwindow.dataLayer = window.dataLayer || [];\nfunction gtag(){dataLayer.push(arguments);}\ngtag('consent', 'default', {\n'ad_storage': 'denied', 'ad_user_data': 'denied', 'ad_personalization': 'denied', 'analytics_storage': 'denied'\n});\n</script>\n";
+        ?>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('consent', 'default', {
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'analytics_storage': 'denied',
+                'wait_for_update': 500
+            });
+            gtag('consent', 'default', {
+                'regions': ['AE', 'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE']
+            });
+        </script>
+        <?php
     }
 
     public function display_elements() {

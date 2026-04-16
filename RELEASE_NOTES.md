@@ -1,6 +1,56 @@
 # OpenConsent Plugin - Release Notes
 
-## Version 1.0.8 (Current) - 2025-06-19
+## Version 1.1.0 (Current) - 2026-04-16
+
+### Complete Refactoring & Accessibility Overhaul
+
+**Backend Improvements (PHP)**
+* **Fixed:** Version consistency issue (was 1.0.6, now properly 1.1.0 throughout)
+* **Added:** `OC_CONSENT_API_CATEGORIES` constant for better code maintainability
+* **Improved:** AJAX handler with validation, error handling, and better response structure
+* **Enhanced:** GTM consent default script with `wait_for_update` timing and EU regional GDPR targeting
+* **Added:** Try-catch blocks for robust error handling in security-critical areas
+
+**Admin UI Enhancements**
+* **Feature:** Settings import/export as JSON for easy backup and migration between sites
+* **Feature:** Reset to defaults button for quick settings restoration
+* **Improved:** GDPR/CCPA compliance warnings on decline button color picker
+* **Improved:** Google Site Kit detection with better visual feedback and messaging
+* **Added:** Helper tips for Privacy Policy link requirements
+* **Enhanced:** Field descriptions throughout the settings page
+
+**Frontend JavaScript (v1.1.0)**
+* **Security:** Better cookie handling with URL encoding and Secure flag for HTTPS
+* **Feature:** Enhanced Google Consent Mode integration with conversion tracking support
+* **Feature:** Automatic handling of GCLID and WBRAID parameters for Google Ads
+* **Improved:** AJAX requests with 5-second timeout and better error logging
+* **Improved:** Consent status validation and better logging for debugging
+* **Fixed:** Event handling with proper preventDefault() and smart page reload logic
+
+**Frontend CSS (v1.1.0)**
+* **Feature:** CSS Custom Properties (CSS variables) for easier theme customization
+* **Accessibility:** WCAG 2.1 Level AAA compliance with 44px touch targets
+* **Accessibility:** Focus states with visible outlines for keyboard navigation
+* **Feature:** Smooth animations (slide-in for banner, fade-in for widget)
+* **Feature:** Support for prefers-reduced-motion media query for accessibility
+* **Improved:** Responsive design with full-width buttons on mobile
+* **Added:** Print styles to hide banner when printing
+* **Cleanup:** Removed duplicate frontend-css.css file
+
+**Security & Compliance**
+* **Security:** SameSite and Secure cookie flags for enhanced security
+* **Security:** Improved nonce verification and AJAX error handling
+* **Compliance:** Better GDPR/CCPA compliance messaging in admin interface
+* **Validation:** Input validation and sanitization throughout all settings
+
+**Code Quality**
+* **Documentation:** Added comprehensive CLAUDE.md with development guidelines
+* **Documentation:** Detailed JSDoc comments for all JavaScript functions
+* **Cleanup:** Better code formatting and organization
+
+---
+
+## Version 1.0.8 - 2025-06-19
 
 * **Fixed:** Corrected the positioning of the minimized "Cookie Settings" widget on mobile devices. The widget now has appropriate margins and a max-width to ensure it no longer overflows or gets cut off on smaller viewports.
 
