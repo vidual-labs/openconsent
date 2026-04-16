@@ -19,6 +19,7 @@ OpenConsent is a WordPress plugin designed to help website owners comply with co
 * **Enable/Disable:** Option to easily activate or deactivate the entire banner functionality.
 * **Responsive Design:** The banner and widget are designed to adapt to different screen sizes.
 * **NEW with v1.0.7:** Plugin is able to detect Google Site Kit and then change into compatiblity mode. It fully supports WP Consent API now.
+* **NEW with v1.1.0:** Complete accessibility overhaul with WCAG 2.1 Level AAA compliance, Google Consent Mode v2 enhancements with conversion tracking support, settings import/export functionality, and improved security throughout.
 
 ## Requirements
 
@@ -74,9 +75,13 @@ Remember to click **Save Settings** after making changes.
 * **After Interaction (Accept/Decline):** The main banner is hidden, and a small, clickable "widget" (e.g., "Cookie Settings") appears in the bottom-right corner (this widget's style is default, text is configurable).
 * **Revisiting Consent:** Clicking this widget will re-display the main cookie consent banner, allowing users to change their previous settings.
 
+## Development & Versioning
+
+**Important:** Every commit to this repository includes a version bump and corresponding updates to the README and RELEASE_NOTES. See [CLAUDE.md](CLAUDE.md) for detailed development documentation and version management policies.
+
 ## Changelog
 
-See [RELEASE_NOTES.md](RELEASE_NOTES.md).
+See [RELEASE_NOTES.md](RELEASE_NOTES.md) for complete version history.
 
 ## Support
 

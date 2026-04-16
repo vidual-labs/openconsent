@@ -3,7 +3,7 @@
  * Plugin Name: OpenConsent
  * Plugin URI: https://vidual.org/openconsent
  * Description: A cookie banner that provides consent signals to the native WP Consent API or manages GTM standalone.
- * Version: 1.0.7
+ * Version: 1.1.0
  * Author: vidual
  * Author URI: https://vidual.org
  * License: GPL v2 or later
