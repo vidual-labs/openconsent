@@ -3,6 +3,8 @@
 OpenConsent is a WordPress plugin designed to help website owners comply with cookie consent regulations (Google consent mode v2) by displaying a customizable cookie banner. It integrates with Google Tag Manager (GTM) and implements Google Consent Mode v2 (Basic) to manage how Google tags behave based on user consent. The plugin has been vibecoded to replace costly or bloated Wordpress consent plugins for that purpose.
 
 [![License: GPL v2 or later](https://img.shields.io/badge/License-GPL%20v2%20or%20later-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
+[![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-brightgreen.svg)](https://github.com/vidual-labs/openconsent/releases)
+[![WordPress: 5.0+](https://img.shields.io/badge/WordPress-5.0%2B-blue.svg)](https://wordpress.org)
 ## Features
 
 * **Cookie Consent Banner:** Displays a customizable banner to obtain user consent for cookies.
@@ -101,4 +103,8 @@ See the [LICENSE](https://www.gnu.org/licenses/gpl-2.0.html) file for more detai
 Developed by [vidual](https://vidual.org).
 Plugin page: [OpenConsent](https://github.com/vidual-labs/openconsent)
 
-This plugin has been vibecoded with Gemini 2.5 pro
+---
+
+**Built with:**
+- Initial development: Gemini 2.5 Pro
+- v1.1.0 Refactoring & Enhancement: [Claude Code](https://claude.ai/code) (Anthropic)
