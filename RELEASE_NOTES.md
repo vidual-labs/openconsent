@@ -1,6 +1,19 @@
 # OpenConsent Plugin - Release Notes
 
-## Version 1.1.0 (Current) - 2026-04-16
+## Version 1.1.1 (Current) - 2026-05-13
+
+### Google Consent Mode v2 Compliance Fixes
+
+**Backend (PHP)**
+* **Fixed:** Removed broken regional `consent default` call that specified only `regions` with no consent states (was a no-op)
+* **Added:** `url_passthrough: true` and `ads_data_redaction: true` to the consent default script for measurement preservation when consent is denied
+
+**Frontend JavaScript**
+* **Added:** `ads_data_redaction` and `url_passthrough` toggled in `updateGoogleConsentMode()` — `true` when denied, `false` when granted — per Google Consent Mode v2 best practices
+
+---
+
+## Version 1.1.0 - 2026-04-16
 
 ### Complete Refactoring & Accessibility Overhaul
 
