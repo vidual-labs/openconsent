@@ -201,11 +201,14 @@ jQuery(document).ready(function($) {
                 'analytics_storage': status === 'granted' ? 'granted' : 'denied'
             };
 
-            // Add conversion tracking support for Google Ads
             if (status === 'granted') {
                 consentData['conversion_linker'] = 'granted';
+                consentData['ads_data_redaction'] = false;
+                consentData['url_passthrough'] = false;
                 console.log('OpenConsent: Updating Google Consent Mode to GRANTED (with conversion tracking)');
             } else {
+                consentData['ads_data_redaction'] = true;
+                consentData['url_passthrough'] = true;
                 console.log('OpenConsent: Updating Google Consent Mode to DENIED');
             }
 

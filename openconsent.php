@@ -3,7 +3,7 @@
  * Plugin Name: OpenConsent
  * Plugin URI: https://vidual.org/openconsent
  * Description: A cookie banner that provides consent signals to the native WP Consent API or manages GTM standalone.
- * Version: 1.1.0
+ * Version: 1.1.1
  * Author: vidual
  * Author URI: https://vidual.org
  * License: GPL v2 or later
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 define( 'OC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'OC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'OC_VERSION', '1.1.0' );
+define( 'OC_VERSION', '1.1.1' );
 define( 'OC_SETTINGS_SLUG', 'openconsent_settings' );
 define( 'OC_OPTION_NAME', 'openconsent_settings' );
 define( 'OC_CONSENT_API_CATEGORIES', array( 'analytics', 'marketing', 'preferences', 'functional' ) );
@@ -137,10 +137,9 @@ class OpenConsent_Plugin {
                 'ad_user_data': 'denied',
                 'ad_personalization': 'denied',
                 'analytics_storage': 'denied',
+                'url_passthrough': true,
+                'ads_data_redaction': true,
                 'wait_for_update': 500
-            });
-            gtag('consent', 'default', {
-                'regions': ['AE', 'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE']
             });
         </script>
         <?php
