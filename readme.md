@@ -3,7 +3,7 @@
 OpenConsent is a WordPress plugin designed to help website owners comply with cookie consent regulations (Google consent mode v2) by displaying a customizable cookie banner. It integrates with Google Tag Manager (GTM) and implements Google Consent Mode v2 (Basic) to manage how Google tags behave based on user consent. The plugin has been vibecoded to replace costly or bloated Wordpress consent plugins for that purpose.
 
 [![License: GPL v2 or later](https://img.shields.io/badge/License-GPL%20v2%20or%20later-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
-[![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-brightgreen.svg)](https://github.com/vidual-labs/openconsent/releases)
+[![Version: 1.1.1](https://img.shields.io/badge/Version-1.1.1-brightgreen.svg)](https://github.com/vidual-labs/openconsent/releases)
 [![WordPress: 5.0+](https://img.shields.io/badge/WordPress-5.0%2B-blue.svg)](https://wordpress.org)
 ## Features
 
@@ -22,6 +22,7 @@ OpenConsent is a WordPress plugin designed to help website owners comply with co
 * **Responsive Design:** The banner and widget are designed to adapt to different screen sizes.
 * **NEW with v1.0.7:** Plugin is able to detect Google Site Kit and then change into compatiblity mode. It fully supports WP Consent API now.
 * **NEW with v1.1.0:** Complete accessibility overhaul with WCAG 2.1 Level AAA compliance, Google Consent Mode v2 enhancements with conversion tracking support, settings import/export functionality, and improved security throughout.
+* **NEW with v1.1.1:** Google Consent Mode v2 compliance fixes — `url_passthrough` and `ads_data_redaction` now correctly set in both default and update consent calls; removed broken no-op regional consent default.
 
 ## Requirements
 
@@ -108,3 +109,4 @@ Plugin page: [OpenConsent](https://github.com/vidual-labs/openconsent)
 **Built with:**
 - Initial development: Gemini 2.5 Pro
 - v1.1.0 Refactoring & Enhancement: [Claude Code](https://claude.ai/code) (Anthropic)
+- v1.1.1 Compliance Fixes: [Claude Code](https://claude.ai/code) (Anthropic)
