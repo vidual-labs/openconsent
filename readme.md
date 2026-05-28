@@ -1,3 +1,5 @@
+<img width="1280" height="800" alt="grafik" src="https://github.com/user-attachments/assets/6f7c0863-ff79-494c-95fd-a435974dec5b" />
+
 # OpenConsent Plugin for WordPress
 
 OpenConsent is a WordPress plugin designed to help website owners comply with cookie consent regulations (Google consent mode v2) by displaying a customizable cookie banner. It integrates with Google Tag Manager (GTM) and implements Google Consent Mode v2 (Basic) to manage how Google tags behave based on user consent. The plugin has been vibecoded to replace costly or bloated Wordpress consent plugins for that purpose.
