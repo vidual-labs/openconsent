@@ -139,9 +139,15 @@ git add openconsent.php RELEASE_NOTES.md README.md [other files]
 git commit -m "feat: Add feature XYZ (v1.1.1)"
 ```
 
+### Releases
+Publishing a GitHub release runs `.github/workflows/release-zip.yml`, which builds `openconsent.zip` (top-level folder `openconsent`, without `.github`, `CLAUDE.md` and `assets`) and attaches it to the release.
+
+- The tag must be `v` + the plugin version (e.g. `v1.1.3`); the workflow fails on a mismatch between the tag, the plugin header and `OC_VERSION`
+- The workflow can be started manually for an existing tag (workflow_dispatch)
+
 ### Current Version
-- **Latest**: v1.1.2 (2026-11-20)
-- **Previous**: v1.1.1 (2026-05-13)
+- **Latest**: v1.1.3 (2026-11-20)
+- **Previous**: v1.1.2 (2026-11-20)
 
 ---
 
@@ -335,7 +341,7 @@ define('WP_DEBUG_DISPLAY', false);
 
 | Item | Value |
 |------|-------|
-| Current Version | 1.1.2 |
+| Current Version | 1.1.3 |
 | Minimum WordPress | 5.0 |
 | Minimum PHP | 7.0 |
 | Main File | openconsent.php |
