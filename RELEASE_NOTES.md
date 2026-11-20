@@ -1,6 +1,31 @@
 # OpenConsent Plugin - Release Notes
 
-## Version 1.1.3 (Current) - 2026-11-20
+## Version 1.2.0 (Current) - 2026-11-20
+
+### Joomla Plugin, Universal Snippet and Shared Core
+
+OpenConsent now comes in three packages that share one banner script. Every release contains `openconsent-wordpress.zip`, `openconsent-joomla.zip` and `openconsent.js`.
+
+**New packages**
+* **Added:** Joomla 5/6 system plugin (`joomla/`). Settings: GTM ID, choice duration, re-open widget, texts, position and colors. Ships with English and German texts; any link to `#openconsent` (e.g. a menu item of the type URL) re-opens the banner
+* **Added:** Universal snippet `openconsent.js` for any website (static sites, Webflow, Squarespace, Ghost, …): one self-hosted file plus a small `window.openconsentConfig` object
+
+**Shared core (`core/`)**
+* **Changed:** The banner script no longer needs jQuery. It renders the banner itself from `window.openconsentConfig` (previously `oc_js_vars`), so the markup lives in one place
+* **Changed:** The head script (Consent Mode defaults, GTM for returning visitors) is a shared file that the WordPress and Joomla plugins inline before any other script
+* **Added:** Events `openconsent:ready` and `openconsent:choice` on `document` for integrations
+
+**WordPress**
+* **Changed:** The plugin moved to `wordpress/`; the WP Consent API part is now a small bridge script (`js/wp-consent-bridge.js`). The AJAX fallback uses `fetch` instead of jQuery
+* **Changed:** Release asset renamed from `openconsent.zip` to `openconsent-wordpress.zip`. The folder inside is still `openconsent`, so uploading it updates an existing installation. Settings and the consent cookie are unchanged
+
+**Build & release**
+* **Added:** `build.mjs` (Node, no dependencies) builds all packages into `dist/` and fails if the versions in `wordpress/openconsent.php` and `joomla/openconsent.xml` differ
+* **Changed:** The release workflow builds and attaches all three packages
+
+---
+
+## Version 1.1.3 - 2026-11-20
 
 ### Automated Release ZIP
 

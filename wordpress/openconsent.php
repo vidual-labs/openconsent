@@ -3,7 +3,7 @@
  * Plugin Name: OpenConsent
  * Plugin URI: https://vidual.org/openconsent
  * Description: A cookie banner that provides consent signals to the WP Consent API or manages GTM standalone (Google Consent Mode v2, Basic).
- * Version: 1.1.3
+ * Version: 1.2.0
  * Requires at least: 5.0
  * Requires PHP: 7.0
  * Author: vidual
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 define( 'OC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'OC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'OC_VERSION', '1.1.3' );
+define( 'OC_VERSION', '1.2.0' );
 define( 'OC_SETTINGS_SLUG', 'openconsent_settings' );
 define( 'OC_OPTION_NAME', 'openconsent_settings' );
 define( 'OC_COOKIE_NAME', 'openconsent_status' );
@@ -58,11 +58,8 @@ class OpenConsent_Plugin {
             add_filter( 'wp_consent_api_cookie_expiration', array( $this, 'filter_consent_cookie_expiration' ) );
 
             add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_scripts' ) );
-            add_action( 'wp_footer', array( $this, 'display_elements' ) );
-            // Conditionally add GCM default script only if we are in standalone mode
-            if ( $this->should_load_own_gtm ) {
-                add_action( 'wp_head', array( $this, 'insert_gtm_consent_default' ), 1 );
-            }
+            // Config + head script (Consent Mode defaults in standalone mode) before any other script.
+            add_action( 'wp_head', array( $this, 'insert_head_script' ), 1 );
         }
     }
 
@@ -112,28 +109,44 @@ class OpenConsent_Plugin {
     }
 
     public function enqueue_frontend_scripts() {
-        wp_enqueue_style( 'oc-frontend-css', OC_PLUGIN_URL . 'css/frontend-consent.css', array(), OC_VERSION );
-        wp_enqueue_script( 'oc-frontend-js', OC_PLUGIN_URL . 'js/frontend-consent.js', array('jquery'), OC_VERSION, true );
+        wp_enqueue_style( 'oc-frontend-css', OC_PLUGIN_URL . 'css/openconsent.css', array(), OC_VERSION );
+        wp_enqueue_script( 'oc-wp-consent-bridge', OC_PLUGIN_URL . 'js/wp-consent-bridge.js', array(), OC_VERSION, true );
+        wp_enqueue_script( 'oc-frontend-js', OC_PLUGIN_URL . 'js/openconsent.js', array( 'oc-wp-consent-bridge' ), OC_VERSION, true );
+    }
 
+    /**
+     * Settings for the shared banner script (window.openconsentConfig).
+     */
+    private function get_frontend_config() {
         $options = $this->options;
-
-        wp_localize_script( 'oc-frontend-js', 'oc_js_vars', array(
-            'gtm_id'                  => $this->get_gtm_id(),
-            'should_load_own_gtm'     => $this->should_load_own_gtm,
-            'banner_text'             => wp_kses_post( $this->get_setting( 'banner_text' ) ),
-            'accept_text'             => $this->get_setting( 'accept_text' ),
-            'decline_text'            => $this->get_setting( 'decline_text' ),
-            'minimized_text'          => $this->get_setting( 'minimized_text' ),
-            'enable_minimized_widget' => !isset($options['enable_minimized_widget']) || $options['enable_minimized_widget'] == 1,
-            'cookie_name'             => OC_COOKIE_NAME,
-            'cookie_duration_days'    => $this->get_cookie_duration_days(),
-            'banner_position'         => $this->get_setting( 'banner_position' ),
-            'consent_categories'      => OC_CONSENT_API_CATEGORIES,
-            'wp_consent_api_active'   => function_exists( 'wp_set_consent' ),
-            'debug'                   => defined( 'WP_DEBUG' ) && WP_DEBUG,
-            'ajax_url'                => admin_url( 'admin-ajax.php' ),
-            'ajax_nonce'              => wp_create_nonce( 'openconsent_consent_nonce' ),
-        ) );
+        return array(
+            'gtm_id'                    => $this->get_gtm_id(),
+            'should_load_own_gtm'       => $this->should_load_own_gtm,
+            'banner_text'               => wp_kses_post( $this->get_setting( 'banner_text' ) ),
+            'accept_text'               => $this->get_setting( 'accept_text' ),
+            'decline_text'              => $this->get_setting( 'decline_text' ),
+            'minimized_text'            => $this->get_setting( 'minimized_text' ),
+            'banner_label'              => __( 'Cookie consent', 'openconsent' ),
+            'enable_minimized_widget'   => ! isset( $options['enable_minimized_widget'] ) || $options['enable_minimized_widget'] == 1,
+            'cookie_name'               => OC_COOKIE_NAME,
+            'cookie_duration_days'      => $this->get_cookie_duration_days(),
+            'banner_position'           => $this->get_setting( 'banner_position' ),
+            'banner_bg_color'           => $this->get_setting( 'banner_bg_color' ),
+            'banner_text_color'         => $this->get_setting( 'banner_text_color' ),
+            'link_color'                => $this->get_setting( 'link_color' ),
+            'accept_button_bg_color'    => $this->get_setting( 'accept_button_bg_color' ),
+            'accept_button_text_color'  => $this->get_setting( 'accept_button_text_color' ),
+            'decline_button_bg_color'   => $this->get_setting( 'decline_button_bg_color' ),
+            'decline_button_text_color' => $this->get_setting( 'decline_button_text_color' ),
+            'widget_bg_color'           => $this->get_setting( 'widget_bg_color' ),
+            'widget_text_color'         => $this->get_setting( 'widget_text_color' ),
+            'debug'                     => defined( 'WP_DEBUG' ) && WP_DEBUG,
+            // WP Consent API bridge
+            'consent_categories'        => OC_CONSENT_API_CATEGORIES,
+            'wp_consent_api_active'     => function_exists( 'wp_set_consent' ),
+            'ajax_url'                  => admin_url( 'admin-ajax.php' ),
+            'ajax_nonce'                => wp_create_nonce( 'openconsent_consent_nonce' ),
+        );
     }
 
     public function ajax_update_wp_consent() {
@@ -165,46 +178,21 @@ class OpenConsent_Plugin {
     }
 
     /**
-     * Standalone mode: sets the Consent Mode v2 defaults before anything else runs.
-     * Returning visitors who already granted consent get the update and GTM right here,
+     * Prints the config and the shared head script (js/openconsent-head.js).
+     * Standalone mode: sets the Consent Mode v2 defaults before anything else runs;
+     * returning visitors who already granted consent get the update and GTM right here,
      * so tags do not have to wait for the footer script.
      */
-    public function insert_gtm_consent_default() {
-        ?>
-        <script id="openconsent-consent-default" data-cfasync="false">
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('consent', 'default', {
-                'ad_storage': 'denied',
-                'ad_user_data': 'denied',
-                'ad_personalization': 'denied',
-                'analytics_storage': 'denied',
-                'functionality_storage': 'denied',
-                'personalization_storage': 'denied',
-                'security_storage': 'granted',
-                'wait_for_update': 500
-            });
-            gtag('set', 'ads_data_redaction', true);
-            (function(w,d,s,l,i){
-                var m = d.cookie.match(/(?:^|;\s*)<?php echo esc_js( OC_COOKIE_NAME ); ?>=([^;]*)/);
-                if (!m || m[1] !== 'granted') return;
-                gtag('consent', 'update', {
-                    'ad_storage': 'granted',
-                    'ad_user_data': 'granted',
-                    'ad_personalization': 'granted',
-                    'analytics_storage': 'granted',
-                    'functionality_storage': 'granted',
-                    'personalization_storage': 'granted'
-                });
-                w.ocGtmLoaded = true;
-                w[l].push({'gtm.start': new Date().getTime(), event: 'gtm.js'});
-                var f = d.getElementsByTagName(s)[0], j = d.createElement(s);
-                j.async = true;
-                j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i;
-                f.parentNode.insertBefore(j, f);
-            })(window, document, 'script', 'dataLayer', <?php echo wp_json_encode( $this->get_gtm_id() ); ?>);
-        </script>
-        <?php
+    public function insert_head_script() {
+        $head_script = OC_PLUGIN_DIR . 'js/openconsent-head.js';
+        if ( ! is_readable( $head_script ) ) {
+            return;
+        }
+        $config = wp_json_encode( $this->get_frontend_config(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT );
+        echo '<script id="openconsent-consent-default" data-cfasync="false">' . "\n";
+        echo 'window.openconsentConfig = ' . $config . ";\n";
+        echo file_get_contents( $head_script ); // phpcs:ignore WordPress.Security.EscapeOutput -- static file shipped with the plugin
+        echo "</script>\n";
     }
 
     /**
@@ -215,38 +203,6 @@ class OpenConsent_Plugin {
         if ( ! $this->is_banner_enabled ) return '';
         $label = '' !== trim( (string) $content ) ? $content : $this->get_setting( 'minimized_text' );
         return '<a href="#openconsent" class="oc-open-settings">' . esc_html( $label ) . '</a>';
-    }
-
-    public function display_elements() {
-        $banner_bg_color = $this->get_setting( 'banner_bg_color' );
-        $banner_text_color = $this->get_setting( 'banner_text_color' );
-        $link_color = $this->get_setting( 'link_color' );
-        $banner_position = $this->get_setting( 'banner_position' );
-        $accept_bg_color = $this->get_setting( 'accept_button_bg_color' );
-        $accept_text_color = $this->get_setting( 'accept_button_text_color' );
-        $decline_bg_color = $this->get_setting( 'decline_button_bg_color' );
-        $decline_text_color= $this->get_setting( 'decline_button_text_color' );
-        $widget_bg_color = $this->get_setting( 'widget_bg_color' );
-        $widget_text_color = $this->get_setting( 'widget_text_color' );
-
-        $banner_text = wp_kses_post( $this->get_setting( 'banner_text' ) );
-        $accept_text = $this->get_setting( 'accept_text' );
-        $decline_text = $this->get_setting( 'decline_text' );
-        $minimized_text = $this->get_setting( 'minimized_text' );
-        ?>
-        <div id="oc-cookie-banner" role="dialog" aria-modal="false" aria-label="<?php esc_attr_e( 'Cookie consent', 'openconsent' ); ?>" tabindex="-1" class="oc-banner-position-<?php echo esc_attr( $banner_position ); ?>" style="display: none; background-color: <?php echo esc_attr( $banner_bg_color ); ?>; color: <?php echo esc_attr( $banner_text_color ); ?>;">
-            <div class="oc-banner-content"><?php echo $banner_text; ?></div>
-            <div class="oc-banner-actions">
-                <button type="button" id="oc-accept-btn" style="background-color: <?php echo esc_attr( $accept_bg_color ); ?>; color: <?php echo esc_attr( $accept_text_color ); ?>;"><?php echo esc_html( $accept_text ); ?></button>
-                <button type="button" id="oc-decline-btn" style="background-color: <?php echo esc_attr( $decline_bg_color ); ?>; color: <?php echo esc_attr( $decline_text_color ); ?>; margin-left: 10px;"><?php echo esc_html( $decline_text ); ?></button>
-            </div>
-        </div>
-        <button type="button" id="oc-cookie-widget" style="display: none; background-color: <?php echo esc_attr( $widget_bg_color ); ?>; color: <?php echo esc_attr( $widget_text_color ); ?>;"><?php echo esc_html( $minimized_text ); ?></button>
-        <style>
-            #oc-cookie-banner .oc-banner-content a, #oc-cookie-banner .oc-banner-content a:visited { color: <?php echo esc_attr( $link_color ); ?> !important; }
-            #oc-cookie-banner .oc-banner-content a:hover, #oc-cookie-banner .oc-banner-content a:focus { text-decoration: underline; }
-        </style>
-        <?php
     }
 }
 

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="plugin" group="system" method="upgrade">
+    <name>plg_system_openconsent</name>
+    <author>vidual</author>
+    <creationDate>2026-11-20</creationDate>
+    <copyright>(C) 2026 vidual</copyright>
+    <license>GNU General Public License version 2 or later</license>
+    <authorUrl>https://vidual.org</authorUrl>
+    <version>1.2.0</version>
+    <description>PLG_SYSTEM_OPENCONSENT_XML_DESCRIPTION</description>
+    <namespace path="src">Vidual\Plugin\System\OpenConsent</namespace>
+    <files>
+        <folder plugin="openconsent">services</folder>
+        <folder>src</folder>
+        <folder>language</folder>
+    </files>
+    <media destination="plg_system_openconsent" folder="media">
+        <folder>css</folder>
+        <folder>js</folder>
+    </media>
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field
+                    name="gtm_id"
+                    type="text"
+                    label="PLG_SYSTEM_OPENCONSENT_GTM_ID_LABEL"
+                    description="PLG_SYSTEM_OPENCONSENT_GTM_ID_DESC"
+                    hint="GTM-XXXXXXX"
+                    pattern="^\s*[Gg][Tt][Mm]-[A-Za-z0-9]{4,12}\s*$"
+                    filter="string"
+                />
+                <field
+                    name="cookie_duration_days"
+                    type="number"
+                    label="PLG_SYSTEM_OPENCONSENT_COOKIE_DURATION_LABEL"
+                    description="PLG_SYSTEM_OPENCONSENT_COOKIE_DURATION_DESC"
+                    default="180"
+                    min="1"
+                    max="390"
+                    filter="integer"
+                />
+                <field
+                    name="enable_minimized_widget"
+                    type="radio"
+                    label="PLG_SYSTEM_OPENCONSENT_WIDGET_LABEL"
+                    description="PLG_SYSTEM_OPENCONSENT_WIDGET_DESC"
+                    layout="joomla.form.field.radio.switcher"
+                    default="1"
+                    filter="integer"
+                    >
+                    <option value="0">JNO</option>
+                    <option value="1">JYES</option>
+                </field>
+            </fieldset>
+            <fieldset name="content" label="PLG_SYSTEM_OPENCONSENT_FIELDSET_CONTENT">
+                <field
+                    name="banner_text"
+                    type="editor"
+                    label="PLG_SYSTEM_OPENCONSENT_BANNER_TEXT_LABEL"
+                    description="PLG_SYSTEM_OPENCONSENT_BANNER_TEXT_DESC"
+                    buttons="false"
+                    height="200"
+                    filter="safehtml"
+                />
+                <field
+                    name="accept_text"
+                    type="text"
+                    label="PLG_SYSTEM_OPENCONSENT_ACCEPT_TEXT_LABEL"
+                    hint="PLG_SYSTEM_OPENCONSENT_ACCEPT"
+                    filter="string"
+                />
+                <field
+                    name="decline_text"
+                    type="text"
+                    label="PLG_SYSTEM_OPENCONSENT_DECLINE_TEXT_LABEL"
+                    hint="PLG_SYSTEM_OPENCONSENT_DECLINE"
+                    filter="string"
+                />
+                <field
+                    name="minimized_text"
+                    type="text"
+                    label="PLG_SYSTEM_OPENCONSENT_MINIMIZED_TEXT_LABEL"
+                    description="PLG_SYSTEM_OPENCONSENT_MINIMIZED_TEXT_DESC"
+                    hint="PLG_SYSTEM_OPENCONSENT_COOKIE_SETTINGS"
+                    filter="string"
+                />
+            </fieldset>
+            <fieldset name="design" label="PLG_SYSTEM_OPENCONSENT_FIELDSET_DESIGN">
+                <field
+                    name="banner_position"
+                    type="list"
+                    label="PLG_SYSTEM_OPENCONSENT_POSITION_LABEL"
+                    default="bottom-full"
+                    validate="options"
+                    >
+                    <option value="bottom-full">PLG_SYSTEM_OPENCONSENT_POSITION_BOTTOM_FULL</option>
+                    <option value="bottom-left">PLG_SYSTEM_OPENCONSENT_POSITION_BOTTOM_LEFT</option>
+                    <option value="bottom-center">PLG_SYSTEM_OPENCONSENT_POSITION_BOTTOM_CENTER</option>
+                    <option value="bottom-right">PLG_SYSTEM_OPENCONSENT_POSITION_BOTTOM_RIGHT</option>
+                    <option value="top-full">PLG_SYSTEM_OPENCONSENT_POSITION_TOP_FULL</option>
+                    <option value="top-left">PLG_SYSTEM_OPENCONSENT_POSITION_TOP_LEFT</option>
+                    <option value="top-center">PLG_SYSTEM_OPENCONSENT_POSITION_TOP_CENTER</option>
+                    <option value="top-right">PLG_SYSTEM_OPENCONSENT_POSITION_TOP_RIGHT</option>
+                    <option value="middle-left">PLG_SYSTEM_OPENCONSENT_POSITION_MIDDLE_LEFT</option>
+                    <option value="middle-center">PLG_SYSTEM_OPENCONSENT_POSITION_MIDDLE_CENTER</option>
+                    <option value="middle-right">PLG_SYSTEM_OPENCONSENT_POSITION_MIDDLE_RIGHT</option>
+                </field>
+                <field name="banner_bg_color" type="color" label="PLG_SYSTEM_OPENCONSENT_BANNER_BG_COLOR_LABEL" default="#222222" validate="color" />
+                <field name="banner_text_color" type="color" label="PLG_SYSTEM_OPENCONSENT_BANNER_TEXT_COLOR_LABEL" default="#ffffff" validate="color" />
+                <field name="link_color" type="color" label="PLG_SYSTEM_OPENCONSENT_LINK_COLOR_LABEL" default="#00a0d2" validate="color" />
+                <field name="accept_button_bg_color" type="color" label="PLG_SYSTEM_OPENCONSENT_ACCEPT_BG_COLOR_LABEL" default="#0073aa" validate="color" />
+                <field name="accept_button_text_color" type="color" label="PLG_SYSTEM_OPENCONSENT_ACCEPT_TEXT_COLOR_LABEL" default="#ffffff" validate="color" />
+                <field name="decline_button_bg_color" type="color" label="PLG_SYSTEM_OPENCONSENT_DECLINE_BG_COLOR_LABEL" default="#757575" validate="color" />
+                <field name="decline_button_text_color" type="color" label="PLG_SYSTEM_OPENCONSENT_DECLINE_TEXT_COLOR_LABEL" default="#ffffff" validate="color" />
+                <field name="widget_bg_color" type="color" label="PLG_SYSTEM_OPENCONSENT_WIDGET_BG_COLOR_LABEL" default="#333333" validate="color" />
+                <field name="widget_text_color" type="color" label="PLG_SYSTEM_OPENCONSENT_WIDGET_TEXT_COLOR_LABEL" default="#ffffff" validate="color" />
+            </fieldset>
+        </fields>
+    </config>
+</extension>
