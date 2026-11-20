@@ -14,6 +14,13 @@ This plugin replaces bloated, expensive consent management plugins by providing 
 - ✅ **Conversion Tracking**: Support for GCLID/WBRAID parameters
 - ✅ **Accessibility**: WCAG 2.1 Level AAA compliance
 
+### Design Principle: Keep It Simple
+The banner is deliberately one decision: **Accept** or **Decline** for everything. This is a core product decision by the maintainer.
+
+- Do **not** add granular consent categories, per-purpose toggles or a second "settings" layer
+- Do **not** propose them as an improvement in reviews
+- New features must keep the banner and the settings page small
+
 ---
 
 ## Critical Features for Development
@@ -25,7 +32,9 @@ The plugin implements **Basic Consent Mode** with the following approach:
 - **User Choice**: Banner allows users to explicitly grant or deny consent
 - **Dynamic Loading**: GTM script only loads after user grants consent
 - **Consent Update**: Uses `gtag('consent', 'update', {...})` to update Google's consent state
-- **EU Regional Targeting**: Includes regional targeting for GDPR compliance
+- **Only consent types in consent commands**: settings such as `ads_data_redaction` go through `gtag('set', ...)`, never into `consent` commands
+- **Returning visitors**: the inline `<head>` script reads the consent cookie, sends the update and loads GTM
+- **No regional targeting**: defaults apply to all visitors
 
 **Important Files**:
 - `openconsent.php` - Main plugin file, handles consent default injection
@@ -46,16 +55,16 @@ The plugin automatically adapts based on what's active:
 - Injects default consent script in `<head>`
 
 ### 3. WordPress Consent API Support
-- Implements native WP Consent API (WP 6.5+)
-- Sets consent for categories: `analytics`, `marketing`, `preferences`, `functional`
-- AJAX endpoint: `wp_ajax_openconsent_update_consent`
+- Works with the WP Consent API plugin (`wp-consent-api`); registers as an opt-in consent manager
+- Sets consent for categories: `statistics`, `statistics-anonymous`, `marketing`, `preferences` (`functional` is always allowed)
+- Client-side via `wp_set_consent()` when available; AJAX fallback: `wp_ajax_openconsent_update_consent`
 
 ---
 
 ## Important Code Areas
 
 ### Backend (PHP)
-**File**: `openconsent.php`
+**File**: `openconsent.php` (plus `uninstall.php`, which deletes the option on plugin removal)
 
 Key Methods:
 - `init_plugin()` - Registers hooks and initializes plugin
@@ -70,6 +79,7 @@ Key Methods:
 - `register_settings()` - Registers all settings and fields
 - `sanitize_settings()` - Validates and sanitizes all inputs
 - `settings_page_html()` - Main settings page template
+- `handle_admin_actions()` - Runs export/import/reset on `admin_init` (before output)
 - `handle_export_settings()` - Exports settings as JSON
 - `handle_import_settings()` - Imports settings from JSON
 - `handle_reset_settings()` - Resets to default values
@@ -82,8 +92,8 @@ Key Functions:
 - `getCookie()` - Retrieves consent cookie value
 - `loadGtmScript()` - Loads GTM script in standalone mode
 - `updateGoogleConsentMode()` - Updates Google Consent Mode state
-- `handleConversionTrackingParameters()` - Manages GCLID/WBRAID
-- `updateWPConsentAPI()` - AJAX call to update WP Consent API
+- `removeTrackingCookies()` - Deletes Google cookies when consent is declined/withdrawn
+- `updateWPConsentAPI()` / `syncWPConsentAPI()` - Update WP Consent API (client-side, AJAX fallback)
 
 ### Frontend (CSS)
 **File**: `css/frontend-consent.css`
@@ -130,8 +140,8 @@ git commit -m "feat: Add feature XYZ (v1.1.1)"
 ```
 
 ### Current Version
-- **Latest**: v1.1.0 (2026-04-16)
-- **Previous**: v1.0.8 (2025-06-19)
+- **Latest**: v1.1.2 (2026-11-20)
+- **Previous**: v1.1.1 (2026-05-13)
 
 ---
 
@@ -147,6 +157,7 @@ $options = get_option('openconsent_settings');
 'enable_banner'              // bool: Enable/disable plugin
 'enable_minimized_widget'    // bool: Show re-open widget
 'gtm_id'                     // string: GTM-XXXXXXX format
+'cookie_duration_days'       // int: 1-390, default 180 (365 for installs saved before v1.1.2)
 
 // Content
 'banner_text'                // HTML: Main banner message
@@ -183,7 +194,10 @@ window.oc_js_vars = {
     'minimized_text':          string
     'enable_minimized_widget': boolean
     'cookie_name':             'openconsent_status'
-    'cookie_duration_days':    365
+    'cookie_duration_days':    number (setting)
+    'consent_categories':      string[]
+    'wp_consent_api_active':   boolean
+    'debug':                   boolean (WP_DEBUG)
     'banner_position':         string
     'ajax_url':                string
     'ajax_nonce':              string
@@ -198,21 +212,13 @@ window.oc_js_vars = {
 ```
 Name: openconsent_status
 Value: 'granted' | 'denied'
-Duration: 365 days
+Duration: configurable, default 180 days
 Flags: SameSite=Lax; Secure (on HTTPS)
 Path: /
 ```
 
-### Conversion Tracking Cookies (if consent granted)
-```
-Name: gclid (Google Click ID)
-Duration: 90 days
-```
-
-```
-Name: wbraid (Web Attribution ID)
-Duration: 90 days
-```
+### Conversion Tracking Cookies
+The plugin no longer writes its own `gclid` / `wbraid` cookies (removed in v1.1.2; Google's Conversion Linker handles click IDs). On decline, Google cookies (`_ga*`, `_gid`, `_gat*`, `_gcl_*`, `_gac_*`) and legacy `gclid` / `wbraid` cookies are deleted.
 
 ---
 
@@ -286,7 +292,8 @@ Before releasing a new version:
 - [ ] Responsive design on mobile (< 768px)
 - [ ] Keyboard navigation (Tab, Enter)
 - [ ] Screen reader compatible
-- [ ] GCLID/WBRAID parameters handled
+- [ ] Declining after accepting removes Google cookies
+- [ ] `[openconsent_settings_link]` re-opens the banner
 - [ ] Prefers-reduced-motion respected
 - [ ] Color picker works in admin
 - [ ] Banner text editor (wp_editor) works
@@ -297,12 +304,11 @@ Before releasing a new version:
 ## Debugging
 
 ### Console Logging
-The plugin logs extensively to browser console:
+With `WP_DEBUG` enabled, the plugin logs to the browser console:
 ```javascript
 // Helpful messages for troubleshooting
 OpenConsent: Found existing consent cookie - GRANTED
 OpenConsent: Updating Google Consent Mode to GRANTED
-OpenConsent: GCLID detected - conversion tracking enabled
 OpenConsent: WP Consent API updated successfully
 ```
 
@@ -321,7 +327,7 @@ define('WP_DEBUG_DISPLAY', false);
 - **License**: GPL v2 or later
 - **Author**: vidual (https://vidual.org)
 - **GitHub**: https://github.com/vidual-labs/openconsent
-- **Latest Claude Refactoring**: v1.1.0 (2026-04-16)
+- **Latest Claude Refactoring**: v1.1.2 (2026-11-20)
 
 ---
 
@@ -329,7 +335,7 @@ define('WP_DEBUG_DISPLAY', false);
 
 | Item | Value |
 |------|-------|
-| Current Version | 1.1.0 |
+| Current Version | 1.1.2 |
 | Minimum WordPress | 5.0 |
 | Minimum PHP | 7.0 |
 | Main File | openconsent.php |
