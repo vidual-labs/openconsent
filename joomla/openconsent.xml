@@ -6,7 +6,7 @@
     <copyright>(C) 2026 vidual</copyright>
     <license>GNU General Public License version 2 or later</license>
     <authorUrl>https://vidual.org</authorUrl>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
     <description>PLG_SYSTEM_OPENCONSENT_XML_DESCRIPTION</description>
     <namespace path="src">Vidual\Plugin\System\OpenConsent</namespace>
     <files>

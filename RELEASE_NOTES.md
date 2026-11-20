@@ -1,6 +1,24 @@
 # OpenConsent Plugin - Release Notes
 
-## Version 1.2.0 (Current) - 2026-11-20
+## Version 1.3.0 (Current) - 2026-11-20
+
+### TYPO3 Extension and Versioned Release Files
+
+OpenConsent now also comes as a TYPO3 extension. Every release contains `openconsent-wordpress-X.Y.Z.zip`, `openconsent-joomla-X.Y.Z.zip`, `openconsent_X.Y.Z.zip` (TYPO3) and `openconsent-X.Y.Z.js`.
+
+**TYPO3**
+* **Added:** TYPO3 12.4, 13.4 and 14 extension `openconsent` (`typo3/`, Composer package `vidual/openconsent`). A frontend middleware adds the config and the head script right after `<head>` and the banner script and styles before `</head>` on every HTML page, including cached pages; no TypoScript needed
+* **Added:** Settings in **Admin Tools > Settings > Extension Configuration** (global for the installation): show banner, GTM ID, choice duration, re-open widget, texts, position and colors. Custom banner HTML is cleaned with TYPO3's HTML sanitizer
+* **Added:** Default texts in English and German follow the language of the page; any link to `#openconsent` re-opens the banner
+
+**Build & release**
+* **Changed:** Release files carry the version from the tag, e.g. `openconsent-wordpress-1.3.0.zip`. The folder inside the WordPress zip is still `openconsent`, so uploading it updates an existing installation
+* **Changed:** The TYPO3 zip is named `openconsent_X.Y.Z.zip` because the TYPO3 Extension Manager reads the extension key from the file name
+* **Changed:** `build.mjs` also checks the version in `typo3/ext_emconf.php`; the workflow also checks the TYPO3 PHP files
+
+---
+
+## Version 1.2.0 - 2026-11-20
 
 ### Joomla Plugin, Universal Snippet and Shared Core
 
@@ -213,4 +231,4 @@ No changes to the plugin's behaviour.
 ----------
     www.vidual.org
     vibecoded with gemini 2.5 pro
-    tested manually
+    tested manually

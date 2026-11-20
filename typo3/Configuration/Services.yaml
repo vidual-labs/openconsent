@@ -1,0 +1,11 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  Vidual\OpenConsent\:
+    resource: '../Classes/*'
+
+  Vidual\OpenConsent\Middleware\ConsentBanner:
+    public: true

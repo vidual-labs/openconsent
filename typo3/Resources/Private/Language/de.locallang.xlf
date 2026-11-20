@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" target-language="de" datatype="plaintext" original="EXT:openconsent/Resources/Private/Language/locallang.xlf" product-name="openconsent">
+        <body>
+            <trans-unit id="accept" resname="accept">
+                <source>Accept</source>
+                <target>Akzeptieren</target>
+            </trans-unit>
+            <trans-unit id="decline" resname="decline">
+                <source>Decline</source>
+                <target>Ablehnen</target>
+            </trans-unit>
+            <trans-unit id="cookie_settings" resname="cookie_settings">
+                <source>Cookie Settings</source>
+                <target>Cookie-Einstellungen</target>
+            </trans-unit>
+            <trans-unit id="banner_label" resname="banner_label">
+                <source>Cookie consent</source>
+                <target>Cookie-Einwilligung</target>
+            </trans-unit>
+            <trans-unit id="default_banner_text" resname="default_banner_text">
+                <source>We use cookies and similar technologies for analytics and marketing, including services provided by Google. They are only activated if you click “Accept”. You can decline, and you can change or withdraw your choice at any time.</source>
+                <target>Wir verwenden Cookies und ähnliche Technologien für Statistik und Marketing, auch Dienste von Google. Sie werden nur aktiviert, wenn Sie auf „Akzeptieren“ klicken. Sie können ablehnen und Ihre Entscheidung jederzeit ändern oder widerrufen.</target>
+            </trans-unit>
+            <trans-unit id="google_link" resname="google_link">
+                <source>How Google uses data</source>
+                <target>Wie Google Daten nutzt</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>
