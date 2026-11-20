@@ -1,6 +1,18 @@
 # OpenConsent Plugin - Release Notes
 
-## Version 1.1.2 (Current) - 2026-11-20
+## Version 1.1.3 (Current) - 2026-11-20
+
+### Automated Release ZIP
+
+No changes to the plugin's behaviour.
+
+* **Added:** GitHub Actions workflow (`.github/workflows/release-zip.yml`) that builds `openconsent.zip` and attaches it to every published release. The ZIP contains the folder `openconsent`, so uploading it in WordPress updates an existing installation
+* **Added:** The workflow checks PHP syntax and fails if the release tag does not match the plugin version in `openconsent.php`
+* **Improved:** Installation instructions link to the latest release and explain which ZIP to use
+
+---
+
+## Version 1.1.2 - 2026-11-20
 
 ### Compliance & Stability Review
 
