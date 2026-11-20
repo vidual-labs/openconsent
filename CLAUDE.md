@@ -14,6 +14,13 @@ This plugin replaces bloated, expensive consent management plugins by providing 
 - ✅ **Conversion Tracking**: Support for GCLID/WBRAID parameters
 - ✅ **Accessibility**: WCAG 2.1 Level AAA compliance
 
+### Design Principle: Keep It Simple
+The banner is deliberately one decision: **Accept** or **Decline** for everything. This is a core product decision by the maintainer.
+
+- Do **not** add granular consent categories, per-purpose toggles or a second "settings" layer
+- Do **not** propose them as an improvement in reviews
+- New features must keep the banner and the settings page small
+
 ---
 
 ## Critical Features for Development
