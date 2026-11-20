@@ -10,6 +10,56 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class OpenConsent_Admin_Einstellungen {
 
+    const GTM_ID_PATTERN = '/^GTM-[A-Z0-9]{4,12}$/';
+    const DEFAULT_COOKIE_DURATION_DAYS = 180;
+    const LEGACY_COOKIE_DURATION_DAYS = 365;
+    const MAX_COOKIE_DURATION_DAYS = 390;
+
+    public static function is_site_kit_active() {
+        if ( defined( 'GOOGLESITEKIT_VERSION' ) ) {
+            return true;
+        }
+        if ( ! function_exists( 'is_plugin_active' ) ) {
+            include_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+        return is_plugin_active( 'google-site-kit/google-site-kit.php' );
+    }
+
+    /**
+     * How long the visitor's choice is remembered.
+     * Sites that saved their settings before v1.1.2 keep the former 365 days
+     * until the value is changed; new installs start with 180 days.
+     *
+     * @param array|false $options Stored plugin options.
+     * @return int Days
+     */
+    public static function get_cookie_duration_days( $options ) {
+        if ( ! is_array( $options ) ) {
+            return self::DEFAULT_COOKIE_DURATION_DAYS;
+        }
+        if ( empty( $options['cookie_duration_days'] ) ) {
+            return self::LEGACY_COOKIE_DURATION_DAYS;
+        }
+        return max( 1, min( self::MAX_COOKIE_DURATION_DAYS, absint( $options['cookie_duration_days'] ) ) );
+    }
+
+    /**
+     * Default banner message. Names the purposes, Google as recipient and the
+     * right to withdraw, and links to the site's privacy policy if one is set.
+     */
+    public static function get_default_banner_text() {
+        $text = __( 'We use cookies and similar technologies for analytics and marketing, including services provided by Google. They are only activated if you click "Accept". You can decline, and you can change or withdraw your choice at any time.', 'openconsent' );
+
+        $links = array();
+        $privacy_url = function_exists( 'get_privacy_policy_url' ) ? get_privacy_policy_url() : '';
+        if ( $privacy_url ) {
+            $links[] = sprintf( '<a href="%s">%s</a>', esc_url( $privacy_url ), esc_html__( 'Privacy Policy', 'openconsent' ) );
+        }
+        $links[] = sprintf( '<a href="https://business.safety.google/privacy/" target="_blank" rel="noopener noreferrer">%s</a>', esc_html__( 'How Google uses data', 'openconsent' ) );
+
+        return '<p>' . esc_html( $text ) . ' ' . implode( ' | ', $links ) . '</p>';
+    }
+
     /**
      * Get default settings
      * @return array Default settings
@@ -19,7 +69,8 @@ class OpenConsent_Admin_Einstellungen {
             'enable_banner' => 1,
             'enable_minimized_widget' => 1,
             'gtm_id' => '',
-            'banner_text' => sprintf('<p>%s <a href="YOUR_PRIVACY_POLICY_URL_HERE" target="_blank">%s</a>.</p>', __('This website uses cookies to enhance your experience.', 'openconsent'), __('Read our Privacy Policy', 'openconsent')),
+            'cookie_duration_days' => self::DEFAULT_COOKIE_DURATION_DAYS,
+            'banner_text' => self::get_default_banner_text(),
             'accept_text' => __('Accept', 'openconsent'),
             'decline_text' => __('Decline', 'openconsent'),
             'minimized_text' => __('Cookie Settings', 'openconsent'),
@@ -62,6 +113,7 @@ class OpenConsent_Admin_Einstellungen {
 
         // Integration Settings Section
         add_settings_field( 'oc_gtm_id', __('Google Tag Manager ID', 'openconsent'), array(__CLASS__, 'render_gtm_id_field'), OC_SETTINGS_SLUG, 'oc_integration_section');
+        add_settings_field( 'oc_cookie_duration_days', __('Remember Choice For (Days)', 'openconsent'), array(__CLASS__, 'render_cookie_duration_field'), OC_SETTINGS_SLUG, 'oc_integration_section');
 
         // Content & Texts Section
         add_settings_field( 'oc_banner_text', __('Main Banner Message', 'openconsent'), array(__CLASS__, 'render_banner_text_field'), OC_SETTINGS_SLUG, 'oc_content_section');
@@ -87,13 +139,22 @@ class OpenConsent_Admin_Einstellungen {
         $sanitized_input = array();
         $options = get_option( OC_OPTION_NAME );
 
-        $sanitized_input['enable_banner'] = isset( $input['enable_banner'] ) ? 1 : 0;
-        $sanitized_input['enable_minimized_widget'] = isset( $input['enable_minimized_widget'] ) ? 1 : 0;
+        $input = (array) $input;
+
+        $sanitized_input['enable_banner'] = ! empty( $input['enable_banner'] ) ? 1 : 0;
+        $sanitized_input['enable_minimized_widget'] = ! empty( $input['enable_minimized_widget'] ) ? 1 : 0;
+
+        if ( isset( $input['cookie_duration_days'] ) ) {
+            $days = absint( $input['cookie_duration_days'] );
+            if ( $days >= 1 ) {
+                $sanitized_input['cookie_duration_days'] = min( self::MAX_COOKIE_DURATION_DAYS, $days );
+            }
+        }
 
         if ( isset( $input['gtm_id'] ) ) {
-            $gtm_id_value = sanitize_text_field( $input['gtm_id'] );
-            if ( ! empty( $gtm_id_value ) && ! preg_match( '/^GTM-[A-Z0-9]{6,8}$/i', $gtm_id_value ) ) {
-                add_settings_error('oc_gtm_id', 'oc_gtm_id_error', __('Invalid GTM ID format. It must start with "GTM-" followed by 6 to 8 letters (A-Z) or numbers (0-9). Example: GTM-TWZDPZ2N or GTM-K2PQR79.', 'openconsent'), 'error');
+            $gtm_id_value = strtoupper( sanitize_text_field( $input['gtm_id'] ) );
+            if ( ! empty( $gtm_id_value ) && ! preg_match( self::GTM_ID_PATTERN, $gtm_id_value ) ) {
+                add_settings_error('oc_gtm_id', 'oc_gtm_id_error', __('Invalid GTM ID format. It must start with "GTM-" followed by letters (A-Z) or numbers (0-9). Example: GTM-TWZDPZ2N or GTM-K2PQR79.', 'openconsent'), 'error');
                 $sanitized_input['gtm_id'] = $options['gtm_id'] ?? '';
             } else {
                 $sanitized_input['gtm_id'] = $gtm_id_value;
@@ -119,7 +180,11 @@ class OpenConsent_Admin_Einstellungen {
         ];
         foreach ( $color_fields as $field ) {
             if ( isset( $input[$field] ) ) {
-                $sanitized_input[$field] = sanitize_hex_color( $input[$field] );
+                // Invalid or empty values are ignored so the previous colour stays in place.
+                $color = sanitize_hex_color( $input[$field] );
+                if ( ! empty( $color ) ) {
+                    $sanitized_input[$field] = $color;
+                }
             }
         }
 
@@ -137,23 +202,10 @@ class OpenConsent_Admin_Einstellungen {
 
     public static function settings_page_html() {
         if ( ! current_user_can( 'manage_options' ) ) return;
-
-        // Handle import/export
-        if ( isset( $_POST['oc_export_settings'] ) && check_admin_referer( 'oc_export_nonce' ) ) {
-            self::handle_export_settings();
-        }
-        if ( isset( $_POST['oc_import_settings'] ) && check_admin_referer( 'oc_import_nonce' ) ) {
-            self::handle_import_settings();
-        }
-        if ( isset( $_POST['oc_reset_settings'] ) && check_admin_referer( 'oc_reset_nonce' ) ) {
-            self::handle_reset_settings();
-        }
         ?>
         <div class="wrap">
             <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
             <p style="color: #666;"><?php esc_html_e( 'Configure your cookie consent banner settings below. All colors support hex values.', 'openconsent' ); ?></p>
-            <?php settings_errors(); ?>
-
             <form action="options.php" method="post">
                 <?php
                 settings_fields( 'openconsent_settings_group' );
@@ -191,14 +243,41 @@ class OpenConsent_Admin_Einstellungen {
     }
 
     /**
+     * Handle export / import / reset. Runs on admin_init, i.e. before any output,
+     * so the export can send its download headers.
+     */
+    public static function handle_admin_actions() {
+        if ( empty( $_POST ) || ! isset( $_GET['page'] ) || OC_SETTINGS_SLUG !== $_GET['page'] ) {
+            return;
+        }
+        if ( ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+
+        if ( isset( $_POST['oc_export_settings'] ) && check_admin_referer( 'oc_export_nonce' ) ) {
+            self::handle_export_settings();
+        }
+        if ( isset( $_POST['oc_import_settings'] ) && check_admin_referer( 'oc_import_nonce' ) ) {
+            self::handle_import_settings();
+        }
+        if ( isset( $_POST['oc_reset_settings'] ) && check_admin_referer( 'oc_reset_nonce' ) ) {
+            self::handle_reset_settings();
+        }
+    }
+
+    /**
      * Handle settings export
      */
     public static function handle_export_settings() {
         $settings = get_option( OC_OPTION_NAME );
+        if ( ! is_array( $settings ) ) {
+            $settings = self::get_default_settings();
+        }
         $filename = 'openconsent-settings-' . gmdate( 'Y-m-d-H-i-s' ) . '.json';
 
-        header( 'Content-Type: application/json' );
-        header( 'Content-Disposition: attachment; filename=' . $filename );
+        nocache_headers();
+        header( 'Content-Type: application/json; charset=utf-8' );
+        header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
         echo wp_json_encode( $settings, JSON_PRETTY_PRINT );
         exit;
     }
@@ -212,7 +291,13 @@ class OpenConsent_Admin_Einstellungen {
             return;
         }
 
-        $file_content = file_get_contents( $_FILES['oc_import_file']['tmp_name'] );
+        $tmp_name = $_FILES['oc_import_file']['tmp_name'];
+        if ( ! is_uploaded_file( $tmp_name ) || $_FILES['oc_import_file']['size'] > 512 * KB_IN_BYTES ) {
+            add_settings_error( 'oc_import', 'oc_import_error', __( 'Invalid settings file format.', 'openconsent' ), 'error' );
+            return;
+        }
+
+        $file_content = file_get_contents( $tmp_name );
         $imported_settings = json_decode( $file_content, true );
 
         if ( ! is_array( $imported_settings ) ) {
@@ -244,16 +329,16 @@ class OpenConsent_Admin_Einstellungen {
     public static function render_gtm_id_field() {
         $options = get_option( OC_OPTION_NAME );
         $value = $options['gtm_id'] ?? '';
-        $site_kit_active = is_plugin_active('google-site-kit/google-site-kit.php');
+        $site_kit_active = self::is_site_kit_active();
 
-        echo '<input type="text" id="oc_gtm_id" name="' . OC_OPTION_NAME . '[gtm_id]" value="' . esc_attr( $value ) . '" class="regular-text" placeholder="GTM-XXXXXXX" pattern="GTM-[A-Z0-9]+">';
+        echo '<input type="text" id="oc_gtm_id" name="' . OC_OPTION_NAME . '[gtm_id]" value="' . esc_attr( $value ) . '" class="regular-text" placeholder="GTM-XXXXXXX" pattern="[Gg][Tt][Mm]-[A-Za-z0-9]{4,12}">';
 
         if ($site_kit_active) {
             echo '<p class="description" style="color: #0a7600; background: #f0f6f0; padding: 8px; border-radius: 3px; margin-top: 8px;">' .
                 sprintf(
                     '<strong>✓ %s</strong> %s',
                     __('Google Site Kit is active', 'openconsent'),
-                    __('OpenConsent will pass consent information to Site Kit. Ensure your GTM ID is configured within Site Kit for best results.', 'openconsent')
+                    __('OpenConsent passes consent to Site Kit via the WP Consent API. Configure your GTM ID in Site Kit, enable "Consent Mode" in the Site Kit settings and make sure the WP Consent API plugin is active.', 'openconsent')
                 ) .
                 '</p>';
         } else {
@@ -265,6 +350,12 @@ class OpenConsent_Admin_Einstellungen {
                 ) .
                 '</p>';
         }
+    }
+
+    public static function render_cookie_duration_field() {
+        $value = self::get_cookie_duration_days( get_option( OC_OPTION_NAME ) );
+        echo '<input type="number" id="oc_cookie_duration_days" name="' . OC_OPTION_NAME . '[cookie_duration_days]" value="' . esc_attr( $value ) . '" class="small-text" min="1" max="' . esc_attr( self::MAX_COOKIE_DURATION_DAYS ) . '" step="1">';
+        echo '<p class="description">' . esc_html__( 'After this period visitors are asked again. Supervisory authorities recommend 6 to 12 months (the French CNIL: 6 months).', 'openconsent' ) . '</p>';
     }
 
     public static function render_banner_text_field() {
@@ -293,7 +384,7 @@ class OpenConsent_Admin_Einstellungen {
                 sprintf(
                     '<strong>%s:</strong> %s',
                     __( 'Tip', 'openconsent' ),
-                    __( 'Always include a link to your Privacy Policy as required by GDPR/CCPA regulations.', 'openconsent' )
+                    __( 'Name the purposes (analytics, marketing), mention Google as recipient, say that the choice can be withdrawn and link to your Privacy Policy. This is required by the GDPR and by Google\'s EU user consent policy.', 'openconsent' )
                 )
             ) .
             '</p>';
@@ -315,7 +406,7 @@ class OpenConsent_Admin_Einstellungen {
         $options = get_option( OC_OPTION_NAME );
         $checked = !isset( $options['enable_minimized_widget'] ) || $options['enable_minimized_widget'] == 1 ? 'checked' : '';
         echo '<label><input type="checkbox" id="oc_enable_minimized_widget" name="' . OC_OPTION_NAME . '[enable_minimized_widget]" value="1" ' . $checked . '></label>';
-        echo '<p class="description">' . __( 'Show the minimized widget after the user makes a choice.', 'openconsent' ) . '</p>';
+        echo '<p class="description">' . esc_html__( 'Show the minimized widget after the user makes a choice. Visitors must be able to withdraw consent as easily as they gave it: if you turn the widget off, place the shortcode [openconsent_settings_link] (e.g. in your footer or privacy policy) so the banner can be re-opened.', 'openconsent' ) . '</p>';
     }
 
     public static function render_minimized_text_field() {

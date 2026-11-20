@@ -1,0 +1,170 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="960" height="540" role="img" aria-labelledby="oc-title oc-desc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <title id="oc-title">OpenConsent in action</title>
+  <desc id="oc-desc">Animated walkthrough: a visitor sees the cookie banner while all Google consent signals are denied and Google Tag Manager is not loaded. After clicking Accept the signals switch to granted and Google Tag Manager loads. The visitor then re-opens the banner through the Cookie Settings widget and clicks Decline: the signals return to denied, Google Tag Manager is no longer loaded and Google cookies are removed.</desc>
+
+  <style>
+    /* One 18s loop in four phases:
+       1  0-22%   first visit, banner open, everything denied
+       2  22-50%  accepted, widget shown, granted + GTM loaded
+       3  50-72%  banner re-opened via widget (still granted)
+       4  72-100% declined, denied again, cookies removed          */
+    .a { animation-duration: 18s; animation-iteration-count: infinite; animation-timing-function: linear; }
+    .p1  { animation-name: p1; }   .p2  { animation-name: p2; opacity: 0; }
+    .p3  { animation-name: p3; opacity: 0; }   .p4  { animation-name: p4; opacity: 0; }
+    .p13 { animation-name: p13; }  .p24 { animation-name: p24; opacity: 0; }
+    .p14 { animation-name: p14; }  .p23 { animation-name: p23; opacity: 0; }
+    @keyframes p1  { 0%, 21% { opacity: 1 } 22%, 99% { opacity: 0 } 100% { opacity: 1 } }
+    @keyframes p2  { 0%, 21% { opacity: 0 } 22%, 49% { opacity: 1 } 50%, 100% { opacity: 0 } }
+    @keyframes p3  { 0%, 49% { opacity: 0 } 50%, 71% { opacity: 1 } 72%, 100% { opacity: 0 } }
+    @keyframes p4  { 0%, 71% { opacity: 0 } 72%, 99% { opacity: 1 } 100% { opacity: 0 } }
+    @keyframes p13 { 0%, 21% { opacity: 1 } 22%, 49% { opacity: 0 } 50%, 71% { opacity: 1 } 72%, 99% { opacity: 0 } 100% { opacity: 1 } }
+    @keyframes p24 { 0%, 21% { opacity: 0 } 22%, 49% { opacity: 1 } 50%, 71% { opacity: 0 } 72%, 99% { opacity: 1 } 100% { opacity: 0 } }
+    @keyframes p14 { 0%, 21% { opacity: 1 } 22%, 71% { opacity: 0 } 72%, 100% { opacity: 1 } }
+    @keyframes p23 { 0%, 21% { opacity: 0 } 22%, 71% { opacity: 1 } 72%, 100% { opacity: 0 } }
+
+    .cursor { animation-name: cursor; animation-timing-function: ease-in-out; }
+    @keyframes cursor {
+      0%, 5%   { transform: translate(430px, 210px) }
+      17%, 23% { transform: translate(98px, 486px) }
+      42%, 51% { transform: translate(556px, 488px) }
+      64%, 73% { transform: translate(206px, 486px) }
+      88%, 100% { transform: translate(430px, 210px) }
+    }
+    .click { transform-box: fill-box; transform-origin: center; opacity: 0; }
+    .c1 { animation-name: c1; } .c2 { animation-name: c2; } .c3 { animation-name: c3; }
+    @keyframes c1 { 0%, 19% { opacity: 0; transform: scale(.3) } 20% { opacity: .9; transform: scale(.3) } 24% { opacity: 0; transform: scale(1) } 100% { opacity: 0 } }
+    @keyframes c2 { 0%, 47% { opacity: 0; transform: scale(.3) } 48% { opacity: .9; transform: scale(.3) } 52% { opacity: 0; transform: scale(1) } 100% { opacity: 0 } }
+    @keyframes c3 { 0%, 69% { opacity: 0; transform: scale(.3) } 70% { opacity: .9; transform: scale(.3) } 74% { opacity: 0; transform: scale(1) } 100% { opacity: 0 } }
+
+    .progress { animation-name: progress; transform-box: fill-box; transform-origin: left center; }
+    @keyframes progress { from { transform: scaleX(0) } to { transform: scaleX(1) } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .a { animation: none; }
+      .cursor, .click, .progress { display: none; }
+    }
+
+    .label { font-size: 13px; fill: #c9d3df; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .pill  { font-size: 12px; font-weight: 600; text-anchor: middle; }
+    .head  { font-size: 11px; font-weight: 600; letter-spacing: .08em; fill: #8b98a9; }
+    .step  { font-size: 14px; font-weight: 600; fill: #ffffff; }
+    .sub   { font-size: 12.5px; fill: #aeb9c7; }
+  </style>
+
+  <!-- backdrop -->
+  <rect width="960" height="540" rx="14" fill="#10161f"/>
+
+  <!-- ============ browser window ============ -->
+  <clipPath id="win"><rect x="24" y="24" width="600" height="492" rx="10"/></clipPath>
+  <g clip-path="url(#win)">
+    <rect x="24" y="24" width="600" height="492" fill="#ffffff"/>
+    <rect x="24" y="24" width="600" height="38" fill="#e7ebf0"/>
+    <circle cx="46" cy="43" r="5.5" fill="#f26b5e"/><circle cx="64" cy="43" r="5.5" fill="#f5be4f"/><circle cx="82" cy="43" r="5.5" fill="#5fc454"/>
+    <rect x="110" y="32" width="420" height="22" rx="11" fill="#ffffff"/>
+    <text x="126" y="47" font-size="12" fill="#6b7785">https://your-wordpress-site.example</text>
+
+    <!-- page skeleton -->
+    <rect x="48" y="86" width="150" height="16" rx="4" fill="#1f2a38"/>
+    <rect x="410" y="90" width="50" height="8" rx="4" fill="#c5ccd6"/><rect x="474" y="90" width="50" height="8" rx="4" fill="#c5ccd6"/><rect x="538" y="90" width="50" height="8" rx="4" fill="#c5ccd6"/>
+    <rect x="48" y="128" width="552" height="120" rx="8" fill="#eef2f6"/>
+    <rect x="72" y="158" width="250" height="18" rx="5" fill="#b9c3cf"/>
+    <rect x="72" y="188" width="330" height="10" rx="5" fill="#d3dae3"/><rect x="72" y="206" width="280" height="10" rx="5" fill="#d3dae3"/>
+    <rect x="48" y="270" width="170" height="96" rx="8" fill="#eef2f6"/><rect x="239" y="270" width="170" height="96" rx="8" fill="#eef2f6"/><rect x="430" y="270" width="170" height="96" rx="8" fill="#eef2f6"/>
+    <rect x="48" y="384" width="552" height="10" rx="5" fill="#e3e8ee"/><rect x="48" y="404" width="470" height="10" rx="5" fill="#e3e8ee"/>
+    <rect x="48" y="424" width="510" height="10" rx="5" fill="#e3e8ee"/><rect x="48" y="444" width="380" height="10" rx="5" fill="#e3e8ee"/>
+
+    <!-- cookie banner (phases 1 + 3) -->
+    <g class="a p13">
+      <rect x="24" y="398" width="600" height="118" fill="#222222"/>
+      <text x="48" y="426" font-size="12.5" fill="#ffffff">We use cookies and similar technologies for analytics and marketing,</text>
+      <text x="48" y="444" font-size="12.5" fill="#ffffff">including services provided by Google. <tspan fill="#00a0d2" text-decoration="underline">Privacy Policy</tspan></text>
+      <rect x="48" y="462" width="100" height="36" rx="4" fill="#0073aa"/>
+      <text x="98" y="485" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">Accept</text>
+      <rect x="158" y="462" width="100" height="36" rx="4" fill="#757575"/>
+      <text x="208" y="485" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">Decline</text>
+    </g>
+
+    <!-- minimized widget (phases 2 + 4) -->
+    <g class="a p24">
+      <rect x="490" y="468" width="122" height="36" rx="4" fill="#333333"/>
+      <text x="551" y="491" font-size="12.5" font-weight="600" fill="#ffffff" text-anchor="middle">Cookie Settings</text>
+    </g>
+
+    <!-- click ripples -->
+    <circle class="a click c1" cx="98" cy="480" r="26" fill="none" stroke="#ffffff" stroke-width="3"/>
+    <circle class="a click c2" cx="551" cy="486" r="26" fill="none" stroke="#0073aa" stroke-width="3"/>
+    <circle class="a click c3" cx="208" cy="480" r="26" fill="none" stroke="#ffffff" stroke-width="3"/>
+
+    <!-- mouse cursor -->
+    <g class="a cursor">
+      <path d="M0 0 L0 19 L5 14.5 L8.4 22 L11.6 20.6 L8.3 13.2 L14.8 13.2 Z" fill="#ffffff" stroke="#111111" stroke-width="1.4" stroke-linejoin="round"/>
+    </g>
+  </g>
+  <rect x="24" y="24" width="600" height="492" rx="10" fill="none" stroke="#2b3644"/>
+
+  <!-- ============ consent state panel ============ -->
+  <rect x="644" y="24" width="292" height="492" rx="10" fill="#18212d" stroke="#2b3644"/>
+  <text x="664" y="54" class="head">GOOGLE CONSENT MODE V2</text>
+
+  <text x="664" y="86"  class="label">ad_storage</text>
+  <text x="664" y="118" class="label">ad_user_data</text>
+  <text x="664" y="150" class="label">ad_personalization</text>
+  <text x="664" y="182" class="label">analytics_storage</text>
+
+  <!-- denied pills (phases 1 + 4) -->
+  <g class="a p14">
+    <rect x="842" y="70"  width="76" height="24" rx="12" fill="#4a1f24"/><text x="880" y="86"  class="pill" fill="#ff9aa2">denied</text>
+    <rect x="842" y="102" width="76" height="24" rx="12" fill="#4a1f24"/><text x="880" y="118" class="pill" fill="#ff9aa2">denied</text>
+    <rect x="842" y="134" width="76" height="24" rx="12" fill="#4a1f24"/><text x="880" y="150" class="pill" fill="#ff9aa2">denied</text>
+    <rect x="842" y="166" width="76" height="24" rx="12" fill="#4a1f24"/><text x="880" y="182" class="pill" fill="#ff9aa2">denied</text>
+  </g>
+  <!-- granted pills (phases 2 + 3) -->
+  <g class="a p23">
+    <rect x="842" y="70"  width="76" height="24" rx="12" fill="#173d2a"/><text x="880" y="86"  class="pill" fill="#7ee2a8">granted</text>
+    <rect x="842" y="102" width="76" height="24" rx="12" fill="#173d2a"/><text x="880" y="118" class="pill" fill="#7ee2a8">granted</text>
+    <rect x="842" y="134" width="76" height="24" rx="12" fill="#173d2a"/><text x="880" y="150" class="pill" fill="#7ee2a8">granted</text>
+    <rect x="842" y="166" width="76" height="24" rx="12" fill="#173d2a"/><text x="880" y="182" class="pill" fill="#7ee2a8">granted</text>
+  </g>
+
+  <line x1="664" y1="208" x2="916" y2="208" stroke="#2b3644"/>
+  <text x="664" y="236" class="head">GOOGLE TAG MANAGER</text>
+  <text x="664" y="266" class="label">gtm.js</text>
+  <g class="a p14"><rect x="826" y="250" width="92" height="24" rx="12" fill="#2a3340"/><text x="872" y="266" class="pill" fill="#aeb9c7">not loaded</text></g>
+  <g class="a p23"><rect x="826" y="250" width="92" height="24" rx="12" fill="#173d2a"/><text x="872" y="266" class="pill" fill="#7ee2a8">loaded</text></g>
+
+  <line x1="664" y1="292" x2="916" y2="292" stroke="#2b3644"/>
+  <text x="664" y="320" class="head">COOKIES</text>
+  <text x="664" y="350" class="label">openconsent_status</text>
+  <g class="a p1"><rect x="842" y="334" width="76" height="24" rx="12" fill="#2a3340"/><text x="880" y="350" class="pill" fill="#aeb9c7">not set</text></g>
+  <g class="a p23"><rect x="842" y="334" width="76" height="24" rx="12" fill="#173d2a"/><text x="880" y="350" class="pill" fill="#7ee2a8">granted</text></g>
+  <g class="a p4"><rect x="842" y="334" width="76" height="24" rx="12" fill="#4a1f24"/><text x="880" y="350" class="pill" fill="#ff9aa2">denied</text></g>
+  <text x="664" y="382" class="label">_ga, _gcl_au …</text>
+  <g class="a p1"><rect x="842" y="366" width="76" height="24" rx="12" fill="#2a3340"/><text x="880" y="382" class="pill" fill="#aeb9c7">none</text></g>
+  <g class="a p23"><rect x="842" y="366" width="76" height="24" rx="12" fill="#173d2a"/><text x="880" y="382" class="pill" fill="#7ee2a8">set</text></g>
+  <g class="a p4"><rect x="842" y="366" width="76" height="24" rx="12" fill="#4a1f24"/><text x="880" y="382" class="pill" fill="#ff9aa2">removed</text></g>
+
+  <!-- step captions -->
+  <rect x="660" y="412" width="260" height="88" rx="8" fill="#10161f"/>
+  <g class="a p1">
+    <text x="676" y="440" class="step">1 · First visit</text>
+    <text x="676" y="462" class="sub">Everything is denied by default.</text>
+    <text x="676" y="480" class="sub">No Google tag runs before consent.</text>
+  </g>
+  <g class="a p2">
+    <text x="676" y="440" class="step">2 · Accept</text>
+    <text x="676" y="462" class="sub">Consent is updated to granted,</text>
+    <text x="676" y="480" class="sub">then Google Tag Manager loads.</text>
+  </g>
+  <g class="a p3">
+    <text x="676" y="440" class="step">3 · Change of mind</text>
+    <text x="676" y="462" class="sub">The widget re-opens the banner</text>
+    <text x="676" y="480" class="sub">at any time.</text>
+  </g>
+  <g class="a p4">
+    <text x="676" y="440" class="step">4 · Decline / withdraw</text>
+    <text x="676" y="462" class="sub">Back to denied. GTM stays off and</text>
+    <text x="676" y="480" class="sub">Google cookies are removed.</text>
+  </g>
+  <rect x="660" y="497" width="260" height="3" rx="1.5" fill="#2b3644"/>
+  <rect class="a progress" x="660" y="497" width="260" height="3" rx="1.5" fill="#0073aa"/>
+</svg>

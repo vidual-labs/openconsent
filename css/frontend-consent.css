@@ -1,6 +1,6 @@
 /*
  * OpenConsent Frontend CSS
- * Version: 1.1.0
+ * Version: 1.1.2
  * Accessibility and UX improvements
  */
 
@@ -72,6 +72,15 @@
     outline-offset: 2px;
 }
 
+#oc-cookie-banner:focus {
+    outline: none;
+}
+
+#oc-cookie-banner:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: -4px;
+}
+
 #oc-cookie-banner button:active {
     transform: translateY(0);
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -84,6 +93,10 @@
     right: 20px;
     z-index: var(--oc-z-index-widget);
     padding: 10px 14px;
+    border: none;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.4;
     border-radius: var(--oc-border-radius);
     cursor: pointer;
     font-size: 13px;
@@ -156,6 +169,13 @@
     .oc-banner-position-top-left, .oc-banner-position-top-right, .oc-banner-position-top-center {
         top: 10px; bottom: auto;
     }
+    .oc-banner-position-middle-left, .oc-banner-position-middle-right {
+        top: auto;
+    }
+    #oc-cookie-banner {
+        max-height: calc(100vh - 20px);
+        overflow-y: auto;
+    }
     .oc-banner-position-middle-center { max-width: 90%; }
     
     #oc-cookie-banner .oc-banner-actions { flex-direction: column; align-items: stretch; }
@@ -173,14 +193,13 @@
 }
 
 /* --- Animations --- */
+/* Opacity only: animating transform would override the transform that centres the banner. */
 @keyframes oc-slide-in {
     from {
         opacity: 0;
-        transform: translateY(20px);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
     }
 }
 

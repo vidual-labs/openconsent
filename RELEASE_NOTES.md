@@ -1,6 +1,49 @@
 # OpenConsent Plugin - Release Notes
 
-## Version 1.1.1 (Current) - 2026-05-13
+## Version 1.1.2 (Current) - 2026-11-20
+
+### Compliance & Stability Review
+
+**Google Consent Mode v2**
+* **Fixed:** `url_passthrough`, `ads_data_redaction` and `conversion_linker` were sent inside `gtag('consent', …)` commands. They are not consent types and were ignored by Google. `ads_data_redaction` is now set with `gtag('set', 'ads_data_redaction', true)`; `url_passthrough` was dropped because it has no effect in Basic mode (no tag runs before consent)
+* **Added:** `functionality_storage`, `personalization_storage` and `security_storage` to the default and update commands
+* **Improved:** Returning visitors who accepted get the consent update and GTM from the inline `<head>` script instead of waiting for the footer script
+* **Removed:** The plugin's own `gclid` / `wbraid` cookies. Google's Conversion Linker handles click IDs itself; the plugin never read these cookies
+* **Removed:** The `<noscript>` GTM iframe that was inserted by JavaScript (it could never run)
+
+**EU cookie rules (GDPR / ePrivacy)**
+* **Added:** Declining or withdrawing consent removes Google Analytics/Ads cookies (`_ga*`, `_gid`, `_gat*`, `_gcl_*`, `_gac_*`) and the legacy `gclid` / `wbraid` cookies
+* **Added:** Setting "Remember Choice For (Days)" (1–390). New installs default to 180 days; existing installs keep 365 days until changed
+* **Added:** Shortcode `[openconsent_settings_link]`; any link to `#openconsent` or element with class `oc-open-settings` re-opens the banner, so consent can be withdrawn even when the widget is disabled
+* **Improved:** Default banner text names the purposes, Google as recipient and the right to withdraw, links to the WordPress privacy policy page automatically and no longer contains the `YOUR_PRIVACY_POLICY_URL_HERE` placeholder
+
+**WP Consent API / Google Site Kit**
+* **Fixed:** Consent was set for the non-existent category `analytics`; the API (and Site Kit) expects `statistics`. Categories are now `statistics`, `statistics-anonymous`, `marketing`, `preferences`; `functional` is always allowed
+* **Improved:** Consent is set through the API's JavaScript function when available, so Site Kit and other listeners are notified immediately; the AJAX endpoint remains as fallback and is only called when the API is active
+* **Added:** The plugin registers itself as an opt-in consent manager (`wp_consent_api_registered_*`, consent type `optin`) and aligns the API's cookie lifetime with its own; the API cookies are re-synced on page load if they expired earlier
+* **Fixed:** A stale nonce (cached pages) now returns a clean JSON error instead of a bare `-1`
+
+**Admin**
+* **Fixed:** Settings export ran after the admin page had started rendering, so the download contained HTML and headers could not be sent. Export, import and reset now run on `admin_init`
+* **Fixed:** Importing a file with `enable_banner: 0` enabled the banner
+* **Fixed:** An invalid or empty colour was stored as empty and produced broken inline styles; the previous colour is now kept
+* **Fixed:** GTM IDs are normalised to upper case and shorter/longer container IDs are accepted
+* **Fixed:** Duplicate "Settings saved" notices
+* **Added:** `uninstall.php` removes the plugin's option when the plugin is deleted
+* **Added:** Plugin headers `Requires at least` / `Requires PHP`
+
+**Frontend**
+* **Accessibility:** The widget is now a real `<button>` (reachable and operable by keyboard); the banner has `role="dialog"` and an accessible name; focus moves to the banner when it is re-opened
+* **Fixed:** The slide-in animation overrode the `transform` used to centre the banner, so centred positions jumped while fading in
+* **Fixed:** Middle-left / middle-right banners were stretched on mobile; long banners can now scroll on small screens
+* **Improved:** Console logging only when `WP_DEBUG` is enabled
+
+**Documentation**
+* **Added:** Animated walkthrough (`assets/openconsent-demo.svg`) in the README
+
+---
+
+## Version 1.1.1 - 2026-05-13
 
 ### Google Consent Mode v2 Compliance Fixes
 
