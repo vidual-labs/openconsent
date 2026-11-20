@@ -1,0 +1,53 @@
+# cat=basic/enable/10; type=boolean; label=Show banner: Turn the cookie banner on or off for the whole installation.
+enable_banner = 1
+
+# cat=basic//20; type=string; label=Google Tag Manager ID: Your container ID, e.g. GTM-XXXXXXX. OpenConsent loads GTM only after the visitor accepts. Leave empty if you do not use GTM. Load all Google tags through this container; scripts embedded elsewhere are not blocked.
+gtm_id =
+
+# cat=basic//30; type=int+; label=Remember choice for (days): How long the visitor's choice is stored before the banner asks again (1-390 days).
+cookie_duration_days = 180
+
+# cat=basic//40; type=boolean; label=Show re-open widget: Small button after the visitor's choice that re-opens the banner. If you hide it, add a link to #openconsent (e.g. in the footer or the privacy policy) so visitors can still withdraw consent.
+enable_minimized_widget = 1
+
+# cat=texts//10; type=string; label=Banner message (HTML): Leave empty for the default text in the language of the page. Name the purposes and Google as recipient, and link to your privacy policy.
+banner_text =
+
+# cat=texts//20; type=string; label=Accept button: Leave empty for "Accept" in the language of the page.
+accept_text =
+
+# cat=texts//30; type=string; label=Decline button: Leave empty for "Decline" in the language of the page.
+decline_text =
+
+# cat=texts//40; type=string; label=Re-open widget: Leave empty for "Cookie Settings" in the language of the page.
+minimized_text =
+
+# cat=design//10; type=options[Bottom (Full Width)=bottom-full,Bottom Left (Floating)=bottom-left,Bottom Center (Floating)=bottom-center,Bottom Right (Floating)=bottom-right,Top (Full Width)=top-full,Top Left (Floating)=top-left,Top Center (Floating)=top-center,Top Right (Floating)=top-right,Middle Left (Floating)=middle-left,Middle Center (Modal)=middle-center,Middle Right (Floating)=middle-right]; label=Banner position
+banner_position = bottom-full
+
+# cat=design//20; type=color; label=Banner background
+banner_bg_color = #222222
+
+# cat=design//21; type=color; label=Banner text
+banner_text_color = #ffffff
+
+# cat=design//22; type=color; label=Links
+link_color = #00a0d2
+
+# cat=design//23; type=color; label=Accept button background
+accept_button_bg_color = #0073aa
+
+# cat=design//24; type=color; label=Accept button text
+accept_button_text_color = #ffffff
+
+# cat=design//25; type=color; label=Decline button background
+decline_button_bg_color = #757575
+
+# cat=design//26; type=color; label=Decline button text
+decline_button_text_color = #ffffff
+
+# cat=design//27; type=color; label=Widget background
+widget_bg_color = #333333
+
+# cat=design//28; type=color; label=Widget text
+widget_text_color = #ffffff

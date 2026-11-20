@@ -3,7 +3,7 @@
  * Plugin Name: OpenConsent
  * Plugin URI: https://vidual.org/openconsent
  * Description: A cookie banner that provides consent signals to the WP Consent API or manages GTM standalone (Google Consent Mode v2, Basic).
- * Version: 1.2.0
+ * Version: 1.3.0
  * Requires at least: 5.0
  * Requires PHP: 7.0
  * Author: vidual
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 define( 'OC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'OC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'OC_VERSION', '1.2.0' );
+define( 'OC_VERSION', '1.3.0' );
 define( 'OC_SETTINGS_SLUG', 'openconsent_settings' );
 define( 'OC_OPTION_NAME', 'openconsent_settings' );
 define( 'OC_COOKIE_NAME', 'openconsent_status' );

@@ -1,21 +1,23 @@
-# OpenConsent - Cookie Banner for WordPress, Joomla and any website
+# OpenConsent - Cookie Banner for WordPress, Joomla, TYPO3 and any website
 
 ## Overview
 
 **OpenConsent** is a lightweight, developer-friendly cookie banner designed for **Google Consent Mode v2 (Basic)** compliance. It provides a customizable cookie consent banner that integrates seamlessly with Google Tag Manager (GTM) and, on WordPress, the WordPress Consent API.
 
 ### Monorepo Layout
-One shared frontend, three packages, **one shared version**:
+One shared frontend, four packages, **one shared version**:
 
 | Folder | Content |
 |---|---|
 | `core/` | Shared frontend, the only copy: `openconsent.js` (banner, no dependencies), `openconsent-head.js` (Consent Mode defaults, inlined in `<head>`), `openconsent.css` |
 | `wordpress/` | WordPress plugin; `js/wp-consent-bridge.js` connects the core to the WP Consent API |
 | `joomla/` | Joomla 5/6 system plugin `plg_system_openconsent` (settings form in `openconsent.xml`, en-GB + de-DE) |
+| `typo3/` | TYPO3 12.4/13.4/14 extension `openconsent` (Composer `vidual/openconsent`): PSR-15 frontend middleware, settings in `ext_conf_template.txt` (global Extension Configuration), XLIFF en + de |
 | `snippet/` | `example.html` for the universal snippet (`openconsent.js` = head script + CSS + banner in one file) |
-| `build.mjs` | `node build.mjs` builds `dist/openconsent-wordpress.zip`, `dist/openconsent-joomla.zip`, `dist/openconsent.js` |
+| `build.mjs` | `node build.mjs` builds `dist/openconsent-wordpress-X.Y.Z.zip`, `dist/openconsent-joomla-X.Y.Z.zip`, `dist/openconsent_X.Y.Z.zip` (TYPO3), `dist/openconsent-X.Y.Z.js` |
 
-- Core files are **not** committed inside `wordpress/` or `joomla/`; the build copies them in (`js/`, `css/` resp. `media/js/`, `media/css/`)
+- Core files are **not** committed inside `wordpress/`, `joomla/` or `typo3/`; the build copies them in (`js/`, `css/` resp. `media/js/`, `media/css/` resp. `Resources/Public/JavaScript/`, `Resources/Public/Css/`)
+- The TYPO3 zip must stay named `openconsent_X.Y.Z.zip`: the Extension Manager derives the extension key from the file name
 - Behaviour changes to the banner belong in `core/`, not in a CMS package
 - CMS-specific features (WP Consent API, Site Kit, shortcode) stay in their package and talk to the core via the events `openconsent:ready` / `openconsent:choice`
 
@@ -57,6 +59,7 @@ The plugin implements **Basic Consent Mode** with the following approach:
 - `wordpress/openconsent.php` - WordPress main file, inlines config + head script
 - `wordpress/admin/admin-einstellungen.php` - WordPress settings and validation
 - `joomla/src/Extension/OpenConsent.php` - Joomla plugin, inserts config + head script after `<head>`
+- `typo3/Classes/Middleware/ConsentBanner.php` - TYPO3 middleware, inserts config + head script after `<head>` and assets before `</head>`
 
 ### 2. Dual-Mode Architecture
 The plugin automatically adapts based on what's active:
@@ -108,6 +111,12 @@ Key Methods:
 - `getFrontendConfig()` - Builds `window.openconsentConfig` from the plugin params (validated)
 - `services/provider.php` - Creates the plugin; passes the dispatcher only on Joomla < 5.4
 
+**File**: `typo3/Classes/Middleware/ConsentBanner.php` (TYPO3)
+
+- `process()` - Frontend middleware (after `typo3/cms-frontend/site`): on `text/html` responses inserts config + head script after `<head>`, CSS + banner script (defer) before `</head>`, fixes `Content-Length`
+- `getFrontendConfig()` - Builds `window.openconsentConfig` from the Extension Configuration (validated); texts via XLIFF in the page language
+- Registered in `Configuration/RequestMiddlewares.php`; DI via `Configuration/Services.yaml`
+
 ### Frontend (JavaScript)
 **File**: `core/openconsent.js` (no jQuery; renders banner + widget from the config)
 
@@ -139,7 +148,7 @@ Key Features:
 ### **IMPORTANT: Version Bump Policy**
 
 ⚠️ **Every commit must include**:
-1. **Version bump** in `wordpress/openconsent.php` (plugin header + `OC_VERSION` constant) **and** `joomla/openconsent.xml` (`<version>`); `build.mjs` fails if they differ
+1. **Version bump** in `wordpress/openconsent.php` (plugin header + `OC_VERSION` constant), `joomla/openconsent.xml` (`<version>`) **and** `typo3/ext_emconf.php` (`'version'`); `build.mjs` fails if they differ
 2. **Updated README.md** with new features/changes
 3. **Updated RELEASE_NOTES.md** with version entry and date
 
@@ -161,25 +170,25 @@ Where:
 # 4. Update README.md if adding features
 # 5. Commit with message including version
 
-git add wordpress/openconsent.php joomla/openconsent.xml RELEASE_NOTES.md README.md [other files]
+git add wordpress/openconsent.php joomla/openconsent.xml typo3/ext_emconf.php RELEASE_NOTES.md README.md [other files]
 git commit -m "feat: Add feature XYZ (v1.1.1)"
 ```
 
 ### Releases
-Publishing a GitHub release runs `.github/workflows/release-zip.yml`, which runs `node build.mjs --tag <tag>` and attaches `openconsent-wordpress.zip` (top-level folder `openconsent`), `openconsent-joomla.zip` and `openconsent.js` to the release.
+Publishing a GitHub release runs `.github/workflows/release-zip.yml`, which runs `node build.mjs --tag <tag>` and attaches `openconsent-wordpress-X.Y.Z.zip` (top-level folder `openconsent`), `openconsent-joomla-X.Y.Z.zip`, `openconsent_X.Y.Z.zip` (TYPO3) and `openconsent-X.Y.Z.js` to the release (`X.Y.Z` = tag without `v`).
 
-- The tag must be `v` + the version (e.g. `v1.2.0`); the build fails on a mismatch between the tag, the WordPress header, `OC_VERSION` and the Joomla manifest
+- The tag must be `v` + the version (e.g. `v1.3.0`); the build fails on a mismatch between the tag, the WordPress header, `OC_VERSION`, the Joomla manifest and `typo3/ext_emconf.php`
 - The workflow can be started manually for an existing tag (workflow_dispatch)
 
 ### Current Version
-- **Latest**: v1.2.0 (2026-11-20)
-- **Previous**: v1.1.3 (2026-11-20)
+- **Latest**: v1.3.0 (2026-11-20)
+- **Previous**: v1.2.0 (2026-11-20)
 
 ---
 
 ## Configuration & Settings
 
-WordPress: all settings stored in the options table under `openconsent_settings`. Joomla: the same keys as plugin params (no `enable_banner`: the plugin's own enabled state; no import/export/reset).
+WordPress: all settings stored in the options table under `openconsent_settings`. Joomla: the same keys as plugin params (no `enable_banner`: the plugin's own enabled state; no import/export/reset). TYPO3: the same keys incl. `enable_banner` in the global Extension Configuration (`$GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['openconsent']`; no import/export/reset).
 
 ### Settings Structure
 ```php
@@ -214,7 +223,7 @@ $options = get_option('openconsent_settings');
 
 ## Frontend Config
 
-All packages pass the settings as `window.openconsentConfig`, printed in `<head>` together with the head script (WordPress, Joomla) or written by the site owner (snippet). Missing or empty values fall back to the defaults in `core/openconsent.js`.
+All packages pass the settings as `window.openconsentConfig`, printed in `<head>` together with the head script (WordPress, Joomla, TYPO3) or written by the site owner (snippet). Missing or empty values fall back to the defaults in `core/openconsent.js`.
 
 ```javascript
 window.openconsentConfig = {
@@ -230,7 +239,7 @@ window.openconsentConfig = {
     'cookie_duration_days':    number (1-390)
     'banner_position':         string (one of 11)
     '<name>_color':            hex (the 9 design colors)
-    'debug':                   boolean (WP_DEBUG / JDEBUG)
+    'debug':                   boolean (WP_DEBUG / JDEBUG / TYPO3 FE debug)
     // WordPress only (bridge):
     'consent_categories':      string[]
     'wp_consent_api_active':   boolean
@@ -294,6 +303,7 @@ Currently, the plugin uses WordPress standard hooks:
 - `wp_footer` - Banner HTML output
 - `wp_head` - Config + head script (priority 1)
 - Joomla: `onBeforeCompileHead`, `onAfterRender`
+- TYPO3: frontend middleware `vidual/openconsent/consent-banner`
 
 ---
 
@@ -338,7 +348,8 @@ Before releasing a new version:
 - [ ] Banner text editor (wp_editor) works
 - [ ] No console errors
 - [ ] Joomla: plugin installs/updates, settings form saves, banner + `#openconsent` link work, texts in en-GB and de-DE
-- [ ] Snippet: `snippet/example.html` with `dist/openconsent.js` works (defaults, Accept loads GTM, Decline removes cookies)
+- [ ] TYPO3: extension installs (Composer + Extension Manager upload) on 12/13/14, Extension Configuration saves, banner + `#openconsent` link work, texts in en and de
+- [ ] Snippet: `snippet/example.html` with `dist/openconsent-X.Y.Z.js` (renamed to `openconsent.js`) works (defaults, Accept loads GTM, Decline removes cookies)
 
 ---
 
@@ -368,7 +379,7 @@ define('WP_DEBUG_DISPLAY', false);
 - **License**: GPL v2 or later
 - **Author**: vidual (https://vidual.org)
 - **GitHub**: https://github.com/vidual-labs/openconsent
-- **Latest Claude Refactoring**: v1.2.0 (2026-11-20)
+- **Latest Claude Refactoring**: v1.3.0 (2026-11-20)
 
 ---
 
@@ -376,11 +387,12 @@ define('WP_DEBUG_DISPLAY', false);
 
 | Item | Value |
 |------|-------|
-| Current Version | 1.2.0 |
+| Current Version | 1.3.0 |
 | Minimum WordPress | 5.0 |
 | Minimum PHP | 7.0 (WordPress) |
 | Joomla | 5, 6 (`plg_system_openconsent`) |
-| Main Files | wordpress/openconsent.php, joomla/openconsent.xml |
+| TYPO3 | 12.4, 13.4, 14 (ext key `openconsent`, PHP 8.1+) |
+| Main Files | wordpress/openconsent.php, joomla/openconsent.xml, typo3/ext_emconf.php |
 | Settings Key | openconsent_settings |
 | Cookie Name | openconsent_status |
 | Main Slug | openconsent_settings |
