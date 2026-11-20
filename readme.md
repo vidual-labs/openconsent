@@ -2,6 +2,13 @@
 
 # OpenConsent for WordPress, Joomla, TYPO3 and any website
 
+[![License: GPL v2 or later](https://img.shields.io/badge/License-GPL%20v2%20or%20later-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
+[![Version: 1.3.0](https://img.shields.io/badge/Version-1.3.0-brightgreen.svg)](https://github.com/vidual-labs/openconsent/releases)
+[![WordPress: 5.0+](https://img.shields.io/badge/WordPress-5.0%2B-blue.svg)](https://wordpress.org)
+[![Joomla: 5 | 6](https://img.shields.io/badge/Joomla-5%20%7C%206-blue.svg)](https://www.joomla.org)
+[![TYPO3: 12 | 13 | 14](https://img.shields.io/badge/TYPO3-12%20%7C%2013%20%7C%2014-orange.svg)](https://typo3.org)
+
+
 OpenConsent helps website owners comply with cookie consent regulations (Google consent mode v2) by displaying a customizable cookie banner. It integrates with Google Tag Manager (GTM) and implements Google Consent Mode v2 (Basic) to manage how Google tags behave based on user consent. It has been vibecoded to replace costly or bloated consent plugins for that purpose.
 
 It comes in four packages that share one banner script. Release file names carry the version (`X.Y.Z`, e.g. `1.3.0`):
@@ -13,11 +20,6 @@ It comes in four packages that share one banner script. Release file names carry
 | TYPO3 extension | `openconsent_X.Y.Z.zip` | TYPO3 12, 13 and 14 |
 | Universal snippet | `openconsent-X.Y.Z.js` | Any other website: static sites, Webflow, Squarespace, Ghost, … |
 
-[![License: GPL v2 or later](https://img.shields.io/badge/License-GPL%20v2%20or%20later-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
-[![Version: 1.3.0](https://img.shields.io/badge/Version-1.3.0-brightgreen.svg)](https://github.com/vidual-labs/openconsent/releases)
-[![WordPress: 5.0+](https://img.shields.io/badge/WordPress-5.0%2B-blue.svg)](https://wordpress.org)
-[![Joomla: 5 | 6](https://img.shields.io/badge/Joomla-5%20%7C%206-blue.svg)](https://www.joomla.org)
-[![TYPO3: 12 | 13 | 14](https://img.shields.io/badge/TYPO3-12%20%7C%2013%20%7C%2014-orange.svg)](https://typo3.org)
 
 ## See it in action
 
