@@ -451,4 +451,4 @@ class OpenConsent_Admin_Einstellungen {
     public static function render_decline_button_text_color_field() { self::render_color_picker_field( 'decline_button_text_color', '#ffffff' ); }
     public static function render_widget_bg_color_field() { self::render_color_picker_field( 'widget_bg_color', '#333333' ); }
     public static function render_widget_text_color_field() { self::render_color_picker_field( 'widget_text_color', '#ffffff' ); }
-}
+}

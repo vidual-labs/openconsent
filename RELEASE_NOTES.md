@@ -176,4 +176,4 @@
 ----------
     www.vidual.org
     vibecoded with gemini 2.5 pro
-    tested manually
+    tested manually
