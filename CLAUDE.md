@@ -1,8 +1,23 @@
-# OpenConsent - WordPress Cookie Banner Plugin
+# OpenConsent - Cookie Banner for WordPress, Joomla and any website
 
 ## Overview
 
-**OpenConsent** is a lightweight, developer-friendly WordPress plugin designed for **Google Consent Mode v2 (Basic)** compliance. It provides a customizable cookie consent banner that integrates seamlessly with Google Tag Manager (GTM) and the WordPress Consent API.
+**OpenConsent** is a lightweight, developer-friendly cookie banner designed for **Google Consent Mode v2 (Basic)** compliance. It provides a customizable cookie consent banner that integrates seamlessly with Google Tag Manager (GTM) and, on WordPress, the WordPress Consent API.
+
+### Monorepo Layout
+One shared frontend, three packages, **one shared version**:
+
+| Folder | Content |
+|---|---|
+| `core/` | Shared frontend, the only copy: `openconsent.js` (banner, no dependencies), `openconsent-head.js` (Consent Mode defaults, inlined in `<head>`), `openconsent.css` |
+| `wordpress/` | WordPress plugin; `js/wp-consent-bridge.js` connects the core to the WP Consent API |
+| `joomla/` | Joomla 5/6 system plugin `plg_system_openconsent` (settings form in `openconsent.xml`, en-GB + de-DE) |
+| `snippet/` | `example.html` for the universal snippet (`openconsent.js` = head script + CSS + banner in one file) |
+| `build.mjs` | `node build.mjs` builds `dist/openconsent-wordpress.zip`, `dist/openconsent-joomla.zip`, `dist/openconsent.js` |
+
+- Core files are **not** committed inside `wordpress/` or `joomla/`; the build copies them in (`js/`, `css/` resp. `media/js/`, `media/css/`)
+- Behaviour changes to the banner belong in `core/`, not in a CMS package
+- CMS-specific features (WP Consent API, Site Kit, shortcode) stay in their package and talk to the core via the events `openconsent:ready` / `openconsent:choice`
 
 ### Key Purpose
 This plugin replaces bloated, expensive consent management plugins by providing a focused, efficient solution specifically for Google Consent Mode v2 implementation. It enables:
@@ -37,9 +52,11 @@ The plugin implements **Basic Consent Mode** with the following approach:
 - **No regional targeting**: defaults apply to all visitors
 
 **Important Files**:
-- `openconsent.php` - Main plugin file, handles consent default injection
-- `js/frontend-consent.js` - Client-side consent logic and GTM loading
-- `admin/admin-einstellungen.php` - Backend settings and validation
+- `core/openconsent-head.js` - Consent defaults + GTM for returning visitors (shared)
+- `core/openconsent.js` - Client-side consent logic and GTM loading (shared)
+- `wordpress/openconsent.php` - WordPress main file, inlines config + head script
+- `wordpress/admin/admin-einstellungen.php` - WordPress settings and validation
+- `joomla/src/Extension/OpenConsent.php` - Joomla plugin, inserts config + head script after `<head>`
 
 ### 2. Dual-Mode Architecture
 The plugin automatically adapts based on what's active:
@@ -64,16 +81,16 @@ The plugin automatically adapts based on what's active:
 ## Important Code Areas
 
 ### Backend (PHP)
-**File**: `openconsent.php` (plus `uninstall.php`, which deletes the option on plugin removal)
+**File**: `wordpress/openconsent.php` (plus `uninstall.php`, which deletes the option on plugin removal)
 
 Key Methods:
 - `init_plugin()` - Registers hooks and initializes plugin
-- `enqueue_frontend_scripts()` - Sends settings to frontend via `wp_localize_script()`
-- `insert_gtm_consent_default()` - Injects default consent script in `<head>` (standalone mode only)
-- `display_elements()` - Renders banner HTML with inline styles
+- `enqueue_frontend_scripts()` - Enqueues CSS, WP Consent API bridge and banner script
+- `get_frontend_config()` - Builds `window.openconsentConfig`
+- `insert_head_script()` - Prints config + `js/openconsent-head.js` in `<head>` (priority 1)
 - `ajax_update_wp_consent()` - Handles consent AJAX requests
 
-**File**: `admin/admin-einstellungen.php`
+**File**: `wordpress/admin/admin-einstellungen.php`
 
 Key Methods:
 - `register_settings()` - Registers all settings and fields
@@ -84,8 +101,15 @@ Key Methods:
 - `handle_import_settings()` - Imports settings from JSON
 - `handle_reset_settings()` - Resets to default values
 
+**File**: `joomla/src/Extension/OpenConsent.php` (Joomla)
+
+- `onBeforeCompileHead()` - Adds CSS and banner script (defer) via the WebAssetManager
+- `onAfterRender()` - Inserts config + head script right after `<head>` (site, HTML only)
+- `getFrontendConfig()` - Builds `window.openconsentConfig` from the plugin params (validated)
+- `services/provider.php` - Creates the plugin; passes the dispatcher only on Joomla < 5.4
+
 ### Frontend (JavaScript)
-**File**: `js/frontend-consent.js`
+**File**: `core/openconsent.js` (no jQuery; renders banner + widget from the config)
 
 Key Functions:
 - `setCookie()` - Secure cookie handling with SameSite/Secure flags
@@ -93,10 +117,12 @@ Key Functions:
 - `loadGtmScript()` - Loads GTM script in standalone mode
 - `updateGoogleConsentMode()` - Updates Google Consent Mode state
 - `removeTrackingCookies()` - Deletes Google cookies when consent is declined/withdrawn
-- `updateWPConsentAPI()` / `syncWPConsentAPI()` - Update WP Consent API (client-side, AJAX fallback)
+- `renderElements()` - Builds banner and widget (skipped if `#oc-cookie-banner` already exists)
+
+**File**: `wordpress/js/wp-consent-bridge.js` - `update()` / `sync()` for the WP Consent API (client-side, AJAX fallback via `fetch`)
 
 ### Frontend (CSS)
-**File**: `css/frontend-consent.css`
+**File**: `core/openconsent.css`
 
 Key Features:
 - CSS Custom Properties for theming
@@ -113,7 +139,7 @@ Key Features:
 ### **IMPORTANT: Version Bump Policy**
 
 ⚠️ **Every commit must include**:
-1. **Version bump** in `openconsent.php` (line 19: `OC_VERSION` constant)
+1. **Version bump** in `wordpress/openconsent.php` (plugin header + `OC_VERSION` constant) **and** `joomla/openconsent.xml` (`<version>`); `build.mjs` fails if they differ
 2. **Updated README.md** with new features/changes
 3. **Updated RELEASE_NOTES.md** with version entry and date
 
@@ -130,30 +156,30 @@ Where:
 ### Example Workflow
 ```bash
 # 1. Make code changes
-# 2. Update version in openconsent.php
+# 2. Update version in wordpress/openconsent.php and joomla/openconsent.xml
 # 3. Update RELEASE_NOTES.md with new entry
 # 4. Update README.md if adding features
 # 5. Commit with message including version
 
-git add openconsent.php RELEASE_NOTES.md README.md [other files]
+git add wordpress/openconsent.php joomla/openconsent.xml RELEASE_NOTES.md README.md [other files]
 git commit -m "feat: Add feature XYZ (v1.1.1)"
 ```
 
 ### Releases
-Publishing a GitHub release runs `.github/workflows/release-zip.yml`, which builds `openconsent.zip` (top-level folder `openconsent`, without `.github`, `CLAUDE.md` and `assets`) and attaches it to the release.
+Publishing a GitHub release runs `.github/workflows/release-zip.yml`, which runs `node build.mjs --tag <tag>` and attaches `openconsent-wordpress.zip` (top-level folder `openconsent`), `openconsent-joomla.zip` and `openconsent.js` to the release.
 
-- The tag must be `v` + the plugin version (e.g. `v1.1.3`); the workflow fails on a mismatch between the tag, the plugin header and `OC_VERSION`
+- The tag must be `v` + the version (e.g. `v1.2.0`); the build fails on a mismatch between the tag, the WordPress header, `OC_VERSION` and the Joomla manifest
 - The workflow can be started manually for an existing tag (workflow_dispatch)
 
 ### Current Version
-- **Latest**: v1.1.3 (2026-11-20)
-- **Previous**: v1.1.2 (2026-11-20)
+- **Latest**: v1.2.0 (2026-11-20)
+- **Previous**: v1.1.3 (2026-11-20)
 
 ---
 
 ## Configuration & Settings
 
-All settings stored in WordPress options table under `openconsent_settings`.
+WordPress: all settings stored in the options table under `openconsent_settings`. Joomla: the same keys as plugin params (no `enable_banner`: the plugin's own enabled state; no import/export/reset).
 
 ### Settings Structure
 ```php
@@ -186,29 +212,34 @@ $options = get_option('openconsent_settings');
 
 ---
 
-## Frontend Data Localization
+## Frontend Config
 
-JavaScript receives configuration via `wp_localize_script()` in `oc_js_vars`:
+All packages pass the settings as `window.openconsentConfig`, printed in `<head>` together with the head script (WordPress, Joomla) or written by the site owner (snippet). Missing or empty values fall back to the defaults in `core/openconsent.js`.
 
 ```javascript
-window.oc_js_vars = {
-    'gtm_id':                  string
-    'should_load_own_gtm':     boolean
+window.openconsentConfig = {
+    'gtm_id':                  string (GTM-XXXXXXX, validated)
+    'should_load_own_gtm':     boolean (snippet: derived from gtm_id)
     'banner_text':             HTML
     'accept_text':             string
     'decline_text':            string
     'minimized_text':          string
+    'banner_label':            string (aria-label)
     'enable_minimized_widget': boolean
     'cookie_name':             'openconsent_status'
-    'cookie_duration_days':    number (setting)
+    'cookie_duration_days':    number (1-390)
+    'banner_position':         string (one of 11)
+    '<name>_color':            hex (the 9 design colors)
+    'debug':                   boolean (WP_DEBUG / JDEBUG)
+    // WordPress only (bridge):
     'consent_categories':      string[]
     'wp_consent_api_active':   boolean
-    'debug':                   boolean (WP_DEBUG)
-    'banner_position':         string
     'ajax_url':                string
     'ajax_nonce':              string
 }
 ```
+
+Events on `document`: `openconsent:ready` (`detail.status`) and `openconsent:choice` (`detail.status`, `detail.previous`, `detail.waitUntil(promise)`; the reload waits up to 5 s).
 
 ---
 
@@ -261,7 +292,8 @@ Currently, the plugin uses WordPress standard hooks:
 - `admin_init` - Admin settings registration
 - `wp_enqueue_scripts` - Frontend script/style loading
 - `wp_footer` - Banner HTML output
-- `wp_head` - GTM consent default (standalone mode)
+- `wp_head` - Config + head script (priority 1)
+- Joomla: `onBeforeCompileHead`, `onAfterRender`
 
 ---
 
@@ -288,6 +320,7 @@ Currently, the plugin uses WordPress standard hooks:
 Before releasing a new version:
 
 - [ ] PHP syntax validation (`php -l` on all .php files)
+- [ ] `node build.mjs` succeeds; install the plugins from `dist/`
 - [ ] Settings import/export functionality works
 - [ ] Banner displays correctly at all 11 positions
 - [ ] Accept/Decline buttons work and trigger page reload
@@ -304,6 +337,8 @@ Before releasing a new version:
 - [ ] Color picker works in admin
 - [ ] Banner text editor (wp_editor) works
 - [ ] No console errors
+- [ ] Joomla: plugin installs/updates, settings form saves, banner + `#openconsent` link work, texts in en-GB and de-DE
+- [ ] Snippet: `snippet/example.html` with `dist/openconsent.js` works (defaults, Accept loads GTM, Decline removes cookies)
 
 ---
 
@@ -333,7 +368,7 @@ define('WP_DEBUG_DISPLAY', false);
 - **License**: GPL v2 or later
 - **Author**: vidual (https://vidual.org)
 - **GitHub**: https://github.com/vidual-labs/openconsent
-- **Latest Claude Refactoring**: v1.1.2 (2026-11-20)
+- **Latest Claude Refactoring**: v1.2.0 (2026-11-20)
 
 ---
 
@@ -341,10 +376,11 @@ define('WP_DEBUG_DISPLAY', false);
 
 | Item | Value |
 |------|-------|
-| Current Version | 1.1.3 |
+| Current Version | 1.2.0 |
 | Minimum WordPress | 5.0 |
-| Minimum PHP | 7.0 |
-| Main File | openconsent.php |
+| Minimum PHP | 7.0 (WordPress) |
+| Joomla | 5, 6 (`plg_system_openconsent`) |
+| Main Files | wordpress/openconsent.php, joomla/openconsent.xml |
 | Settings Key | openconsent_settings |
 | Cookie Name | openconsent_status |
 | Main Slug | openconsent_settings |

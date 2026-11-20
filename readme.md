@@ -1,12 +1,21 @@
 <img width="1280" height="800" alt="grafik" src="https://github.com/user-attachments/assets/6f7c0863-ff79-494c-95fd-a435974dec5b" />
 
-# OpenConsent Plugin for WordPress
+# OpenConsent for WordPress, Joomla and any website
 
-OpenConsent is a WordPress plugin designed to help website owners comply with cookie consent regulations (Google consent mode v2) by displaying a customizable cookie banner. It integrates with Google Tag Manager (GTM) and implements Google Consent Mode v2 (Basic) to manage how Google tags behave based on user consent. The plugin has been vibecoded to replace costly or bloated Wordpress consent plugins for that purpose.
+OpenConsent helps website owners comply with cookie consent regulations (Google consent mode v2) by displaying a customizable cookie banner. It integrates with Google Tag Manager (GTM) and implements Google Consent Mode v2 (Basic) to manage how Google tags behave based on user consent. It has been vibecoded to replace costly or bloated consent plugins for that purpose.
+
+It comes in three packages that share one banner script:
+
+| Package | Release file | For |
+|---|---|---|
+| WordPress plugin | `openconsent-wordpress.zip` | WordPress 5.0+ (with Google Site Kit / WP Consent API support) |
+| Joomla plugin | `openconsent-joomla.zip` | Joomla 5 and 6 |
+| Universal snippet | `openconsent.js` | Any other website: static sites, Webflow, Squarespace, Ghost, … |
 
 [![License: GPL v2 or later](https://img.shields.io/badge/License-GPL%20v2%20or%20later-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
-[![Version: 1.1.3](https://img.shields.io/badge/Version-1.1.3-brightgreen.svg)](https://github.com/vidual-labs/openconsent/releases)
+[![Version: 1.2.0](https://img.shields.io/badge/Version-1.2.0-brightgreen.svg)](https://github.com/vidual-labs/openconsent/releases)
 [![WordPress: 5.0+](https://img.shields.io/badge/WordPress-5.0%2B-blue.svg)](https://wordpress.org)
+[![Joomla: 5 | 6](https://img.shields.io/badge/Joomla-5%20%7C%206-blue.svg)](https://www.joomla.org)
 
 ## See it in action
 
@@ -37,25 +46,27 @@ OpenConsent is a WordPress plugin designed to help website owners comply with co
     * New setting **Remember Choice For (Days)** (default 180 for new installs).
     * Better default banner text (purposes, Google as recipient, withdrawal, automatic privacy policy link).
     * Fixed settings export/import, keyboard access to the widget and the position of centred banners.
+* **NEW with v1.2.0:** OpenConsent for Joomla 5/6 and a universal snippet for any website, built from one shared banner script without jQuery. The WordPress release file is now called `openconsent-wordpress.zip`.
 
 ## Requirements
 
-* WordPress 5.0 or higher (recommended)
-* PHP 7.0 or higher (recommended)
+* **WordPress:** WordPress 5.0 or higher, PHP 7.0 or higher (recommended)
+* **Joomla:** Joomla 5 or 6
+* **Snippet:** any website where you can add scripts to the `<head>`
 
-## Installation
+## Installation (WordPress)
 
 ### Manual Installation
 
-1.  Download `openconsent.zip` from the [latest release](https://github.com/vidual-labs/openconsent/releases/latest). Use this file, not GitHub's "Source code (zip)": only `openconsent.zip` contains the correct `openconsent` folder, so WordPress updates an existing installation instead of adding a second copy.
+1.  Download `openconsent-wordpress.zip` from the [latest release](https://github.com/vidual-labs/openconsent/releases/latest). Use this file, not GitHub's "Source code (zip)": only the release file contains the plugin with its scripts in the correct `openconsent` folder, so WordPress updates an existing installation instead of adding a second copy. (Up to v1.1.3 the file was called `openconsent.zip`.)
 2.  In your WordPress admin panel, go to **Plugins > Add New**.
 3.  Click **Upload Plugin** at the top.
-4.  Upload the `openconsent.zip` file.
+4.  Upload the `openconsent-wordpress.zip` file.
 5.  Activate the plugin through the 'Plugins' menu in WordPress.
 
 Alternatively, you can manually upload the unzipped `openconsent` folder to the `/wp-content/plugins/` directory on your server and then activate it from the Plugins page.
 
-## Configuration
+## Configuration (WordPress)
 
 Once activated, you can configure the OpenConsent plugin by navigating to:
 
@@ -77,6 +88,53 @@ The settings page is divided into the following sections:
     * **Colors:** Customize background, text, link, and button colors.
 
 Remember to click **Save Settings** after making changes.
+
+## Joomla
+
+1.  Download `openconsent-joomla.zip` from the [latest release](https://github.com/vidual-labs/openconsent/releases/latest).
+2.  In the Joomla administrator, go to **System > Install > Extensions** and upload the file.
+3.  Go to **System > Manage > Plugins**, open **System - OpenConsent**, enter your GTM ID and adjust texts, position and colors.
+4.  Enable the plugin and save.
+
+The banner texts default to the site language (English and German included). Leave **Banner Message** empty for the default text, or write your own and link your privacy policy. To let visitors re-open the banner without the widget, add a link to `#openconsent`, e.g. a menu item of the type **URL** in your footer menu.
+
+## Universal Snippet (any website)
+
+1.  Download `openconsent.js` from the [latest release](https://github.com/vidual-labs/openconsent/releases/latest) and upload it to your website. Host it yourself: the banner should not depend on a third-party server.
+2.  Add the following to the `<head>` of every page, as early as possible and before any Google tag. Do not add `async` or `defer`:
+
+```html
+<script>
+  window.openconsentConfig = {
+    gtm_id: 'GTM-XXXXXXX',
+    banner_text: '<p>We use cookies for analytics and marketing, including services provided by Google. They are only activated if you click “Accept”. You can change or withdraw your choice at any time. <a href="/privacy">Privacy Policy</a></p>'
+  };
+</script>
+<script src="/openconsent.js"></script>
+```
+
+3.  Remove any other GTM snippet from your pages: OpenConsent loads GTM itself after the visitor accepts.
+
+All other options are optional:
+
+| Option | Default |
+|---|---|
+| `gtm_id` | none (without it, only the banner and the events below are active) |
+| `banner_text` | generic English text (HTML) |
+| `accept_text`, `decline_text`, `minimized_text` | `Accept`, `Decline`, `Cookie Settings` |
+| `banner_label` | `Cookie consent` (accessible name of the banner) |
+| `enable_minimized_widget` | `true` |
+| `cookie_duration_days` | `180` (1–390) |
+| `banner_position` | `bottom-full`; also `bottom-left`, `bottom-center`, `bottom-right`, `top-full`, `top-left`, `top-center`, `top-right`, `middle-left`, `middle-center`, `middle-right` |
+| `banner_bg_color`, `banner_text_color`, `link_color` | `#222222`, `#ffffff`, `#00a0d2` |
+| `accept_button_bg_color`, `accept_button_text_color` | `#0073aa`, `#ffffff` |
+| `decline_button_bg_color`, `decline_button_text_color` | `#757575`, `#ffffff` |
+| `widget_bg_color`, `widget_text_color` | `#333333`, `#ffffff` |
+| `debug` | `false` (logs to the browser console) |
+
+Any link to `#openconsent` or element with the class `oc-open-settings` re-opens the banner. See [`snippet/example.html`](snippet/example.html) for a complete page.
+
+**Events for integrations** (all packages): `openconsent:ready` (detail: `status` on page load: `granted`, `denied` or `null`) and `openconsent:choice` (detail: `status`, `previous`, `waitUntil(promise)`) are dispatched on `document`.
 
 ## How It Works (Google Consent Mode v2 - Basic)
 
@@ -105,9 +163,20 @@ OpenConsent provides the technical consent signal. It is not legal advice. You s
 
 ## Development & Versioning
 
-**Important:** Every commit to this repository includes a version bump and corresponding updates to the README and RELEASE_NOTES. See [CLAUDE.md](CLAUDE.md) for detailed development documentation and version management policies.
+The repository is a monorepo:
 
-**Releases:** Publishing a GitHub release with a tag that matches the plugin version (e.g. `v1.1.3`) builds `openconsent.zip` and attaches it to the release automatically. The build fails if the tag and the version in `openconsent.php` differ.
+| Folder | Content |
+|---|---|
+| `core/` | Shared frontend: banner script (`openconsent.js`), head script (`openconsent-head.js`), styles (`openconsent.css`) |
+| `wordpress/` | WordPress plugin (PHP, settings page, WP Consent API bridge) |
+| `joomla/` | Joomla system plugin (manifest with settings form, PHP, language files) |
+| `snippet/` | Example page for the universal snippet |
+
+`node build.mjs` (Node 18+, no dependencies) copies the core into both plugins and builds `dist/openconsent-wordpress.zip`, `dist/openconsent-joomla.zip` and `dist/openconsent.js`. The plugins in `wordpress/` and `joomla/` do not contain the core files themselves, so install them from `dist/`.
+
+**Important:** Every commit to this repository includes a version bump and corresponding updates to the README and RELEASE_NOTES. All packages share one version. See [CLAUDE.md](CLAUDE.md) for detailed development documentation and version management policies.
+
+**Releases:** Publishing a GitHub release with a tag that matches the version (e.g. `v1.2.0`) builds all three packages and attaches them to the release automatically. The build fails if the tag and the versions in `wordpress/openconsent.php` and `joomla/openconsent.xml` differ.
 
 ## Changelog
 
@@ -139,3 +208,4 @@ Plugin page: [OpenConsent](https://github.com/vidual-labs/openconsent)
 - v1.1.1 Compliance Fixes: [Claude Code](https://claude.ai/code) (Anthropic): ✅Test succesful with WP 7.0, PHP 8.4 + ✅Compliance approved withGTM Tag Manager
 - v1.1.2 Compliance & Stability Review: [Claude Code](https://claude.ai/code) (Anthropic)
 - v1.1.3 Automated release ZIP: [Claude Code](https://claude.ai/code) (Anthropic)
+- v1.2.0 Joomla plugin, universal snippet, shared core: [Claude Code](https://claude.ai/code) (Anthropic)

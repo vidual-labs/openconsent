@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OpenConsent snippet example</title>
+
+    <!-- OpenConsent: as early as possible in <head>, before any Google tag. No async/defer. -->
+    <script>
+        window.openconsentConfig = {
+            gtm_id: 'GTM-XXXXXXX',
+            banner_text: '<p>We use cookies for analytics and marketing, including services provided by Google. ' +
+                'They are only activated if you click “Accept”. You can change or withdraw your choice at any time. ' +
+                '<a href="/privacy">Privacy Policy</a></p>',
+            banner_position: 'bottom-full'
+        };
+    </script>
+    <script src="openconsent.js"></script>
+</head>
+<body>
+    <h1>OpenConsent snippet example</h1>
+    <p>Put the two script tags above into the <code>&lt;head&gt;</code> of every page.</p>
+    <footer>
+        <a href="#openconsent">Cookie Settings</a>
+    </footer>
+</body>
+</html>
